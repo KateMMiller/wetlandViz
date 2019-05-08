@@ -1,4 +1,5 @@
 library(shiny)
+library(leaflet)
 
 shinyUI(
   navbarPage(
@@ -16,6 +17,23 @@ shinyUI(
     #--------------------------------------------------------------
     #          For Hydrograph Tab
     #--------------------------------------------------------------
+    tabPanel(
+      h4("Map", align = 'center'),
+      style = "padding: 0",
+      useShinyjs(),
+      div(class='outer',
+          tags$head(includeCSS("./www/mapstyles.css")),
+          tags$head(includeScript("https://www.nps.gov/common/commonspot/templates/js/federated-analytics.js"))),
+      fluidRow(
+        column(2, style = 'padding: 0 0 0 10px',
+               div(id="MapPanel", h4('Map Controls'))),
+        column(10, style = "padding: 0",
+               div(leafletOutput("WetlandMap",height="800px")))
+      ) # end fluidRow
+      
+    
+      ), #end tabPanel
+    
     tabPanel(
       h4("Hydrographs", align = 'center'),
       style = "padding: 0",
@@ -45,7 +63,7 @@ shinyUI(
           plotOutput("hydroPlot", width = '100%', height = "700px")
         )
         ) # end fluidpage
-    )# end tabPanel Tree growth and mortality
+    )# end tabPanel Hydrograph
     
     
     ) # end ot title
