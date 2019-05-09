@@ -17,19 +17,47 @@ shinyServer<-function(input,output,session){
       setMaxBounds(lng1 = -68.711, lng2 = -67.953, lat1 = 44.484, lat2 = 43.953)
   })
   
-  # Map Colors
-  #CircleColors<-reactive({
-  #  colorBin(palette = c("DodgerBlue", "ForestGreen"), domain = sitedata$Site_Type)
-  #})
-  
-  observe({
-    leafletProxy("WetlandMap") %>% 
-      addCircles(data=sitedata, radius=40, 
-                 lng=sitedata$Longitude, lat=sitedata$Latitude, 
-                 color=~ifelse(sitedata$Site_Type=='RAM','ForestGreen','DodgerBlue'),
-                 layerId=sitedata$Label, popup= ~as.character(sitedata$Label))
+  # Plot wetland points on map
+  # Select data to map on plot
+  MapData<-reactive({
+    if(input$DataGroup=='vmmi'){
+      df<-vmmimap %>% select(Site_Type,Label,Latitude,Longitude,Mean_C,Pct_Cov_TolN,Sphagnum_Cover,Invasive_Cover,VMMI,VMMI_Rating)
+    } else {
+      df<-sppmap %>% select(Site_Type,Label,Latitude,Longitude,Latin_Name,Common,PctFreq,Ave_Cov)}
+    return(df)
   })
   
+   observe({
+    if(input$DataGroup == 'vmmi'){
+      colorData<-MapData()$VMMI_Rating
+      pal<-colorFactor(palette=c('green','yellow','FireBrick'), domain = colorData)
+      pop<-paste("<b>","Site:", ifelse(MapData()$Site_Type=='Sentinel', paste0(MapData()$Label," (Sentinel)"),
+                                         paste0(MapData()$Label)),"</b>", "<br>",
+                   "Mean C:", round(MapData()$Mean_C,1), "<br>",
+                   "% Cover Tol Spp:", round(MapData()$Pct_Cov_TolN,1), "<br>",
+                   "% Bryophyte:", round(MapData()$Sphagnum_Cover,1), "<br>",
+                   "% Invasive:", round(MapData()$Invasive_Cover,1), "<br>",
+                   "VegMMI Score:", round(MapData()$VMMI,1),"<br>",
+                   "VegMMI Rating:", MapData()$VMMI_Rating, "<br>") 
+    } else if (input$DataGroup == 'spplist'){
+      colorData<-unique(MapData()$Site_Type)
+      pal<-colorFactor(palette=c('DodgerBlue','ForestGreen'), domain = colorData)
+      pop<-paste("<b>", "Site:",ifelse(MapData()$Site_Type=='Sentinel', paste0(MapData()$Label," (Sentinel)"),
+                                      paste0(MapData()$Label)),"</b>", "<br>", "Spp. List Not Yet Functional")
+    }
+
+    leafletProxy("WetlandMap") %>% 
+      clearShapes() %>% 
+      clearControls() %>% 
+      addCircleMarkers(data=MapData(), radius=10, 
+                 lng = MapData()$Longitude, lat = MapData()$Latitude,
+                 fillColor = ~pal(colorData), 
+                 fillOpacity = 1, weight = 1.5, color= "DimGrey", popup=pop
+                 ) %>% 
+      addLegend('bottomleft',pal=pal,values=colorData)
+
+})
+   
   # Make Attribution
   NPSAttrib<-HTML("<a href='https://www.nps.gov/npmap/disclaimer/'>Disclaimer</a> | 
       &copy; <a href='http://mapbox.com/about/maps' target='_blank'>Mapbox</a>

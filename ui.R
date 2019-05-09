@@ -15,7 +15,7 @@ shinyUI(
     id = "MainNavBar",
     
     #--------------------------------------------------------------
-    #          For Hydrograph Tab
+    #          For Map Tab
     #--------------------------------------------------------------
     tabPanel(
       h4("Map", align = 'center'),
@@ -26,7 +26,11 @@ shinyUI(
           tags$head(includeScript("https://www.nps.gov/common/commonspot/templates/js/federated-analytics.js"))),
       fluidRow(
         column(2, style = 'padding: 0 0 0 10px',
-               div(id="MapPanel", h4('Map Controls'))),
+               div(id = "MapPanel", h4('Map Controls', class = 'panel-heading'),
+                   tags$div(title='Choose data type to view', 
+                            selectInput(inputId='DataGroup',
+                            label='Type of data:',
+                            choices=c('Veg MMI' = 'vmmi', 'By Species' = 'spplist'))))),
         column(10, style = "padding: 0",
                div(leafletOutput("WetlandMap",height="800px")))
       ) # end fluidRow
@@ -34,6 +38,10 @@ shinyUI(
     
       ), #end tabPanel
     
+    
+    #--------------------------------------------------------------
+    #          For Hydrograph Tab
+    #--------------------------------------------------------------
     tabPanel(
       h4("Hydrographs", align = 'center'),
       style = "padding: 0",
