@@ -4,6 +4,7 @@
 library(shiny)
 library(shinyjs)
 library(dplyr)
+library(tidyr)
 
 # Pull in water level data
 welld<-read.csv('./data/well_prec_data_2013-2018.csv')
@@ -14,7 +15,6 @@ sentsites<-data.frame(sitename=c("Big Heath", "Duck Pond", "Gilmore Meadow", "He
                              'WMTN_WL'))
 
 # Pull in veg data
-#sitedata<-read.csv('./data/Sentinel_and_USA-RAM_Sites.csv') # Site-level data for plotting
 vmmi<-read.csv('./data/vmmi.csv')
 sppdata<-read.csv("./data/Sentinel_and_RAM_species_data.csv")
 
@@ -23,10 +23,14 @@ sampleyears<-c(2011,2014,2015,2017,2018) # most recent survey of available data
 DataTypes<-list(vmmi='Veg. MMI', spplist='Spp. List')
 
 # Prep veg data for Map panel
-vmmimap<-merge(sitedata,vmmi,by=c('Label'),all.x=T, all.y=T) %>% 
+vmmimap<-merge(sitedata,vmmi,by=c('Label'),all.x=T, all.y=T) %>% mutate_at(vars(Mean_C:VMMI),.~round(.,1)) %>% 
   mutate(VMMI_Rating=factor(VMMI_Rating, levels=c('Good','Fair','Poor'))) %>% 
-  filter(Year %in% sampleyears)
+  filter(Year %in% sampleyears) %>% select(Label,Site_Type,Longitude,Latitude,Year,Mean_C:VMMI_Rating)
+
+vmmimap %>% filter(Label=='RAM-01') %>% droplevels() %>% gather('Metric','Value')
 
 sppmap<-sppdata %>% filter(Year %in% sampleyears) %>% arrange(Label, Latin_Name) %>% droplevels()
+
+sppmap %>% filter(Label=='RAM-01') %>% select(Latin_Name,Common) %>% droplevels() #%>% gather()
 
 
