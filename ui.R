@@ -40,13 +40,10 @@ shinyUI(
           )
         ),
         column(10, style = "padding: 0",
-               div(leafletOutput("WetlandMap", height = "800px")
+               div(leafletOutput("WetlandMap", height = "700px")
                ))
       ) # end fluidRow
-      
-      
-    ),
-    #end tabPanel
+    ),#end tabPanel
     
     
     #--------------------------------------------------------------

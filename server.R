@@ -34,12 +34,12 @@ shinyServer <- function(input, output, session) {
                                Sphagnum_Cover, Invasive_Cover, VMMI, VMMI_Rating)
     } else {
       if(input$DataGroup == 'spplist' & input$Species == 'All'){
-      df <- sppfull %>% select(Site_Type, Label, Latitude, Longitude, Latin_Name, Present)
+      df <- sppfull %>% select(Site_Type, Label, Latitude, Longitude, Latin_Name, Present, HGM_Class:Cowardin_Class)
       
       } else {
         
         if(input$DataGroup == 'spplist' & input$Species !='All'){
-      df<- sppfull %>% select(Site_Type, Label, Latitude, Longitude, Latin_Name, Present) %>% 
+      df<- sppfull %>% select(Site_Type, Label, Latitude, Longitude, Latin_Name, Present, HGM_Class:Cowardin_Class) %>% 
             filter(Latin_Name %in% input$Species) %>% droplevels() 
         }
       }
@@ -47,6 +47,7 @@ shinyServer <- function(input, output, session) {
     return(df)
   })
   
+  # Set up color palette and filter for colors on map
   observe({
     if (input$DataGroup == 'vmmi') {
       colorData <- MapData()$VMMI_Rating
@@ -92,17 +93,15 @@ shinyServer <- function(input, output, session) {
       vmmimap %>% filter(Label == MarkerClick$id) %>% select(Mean_C:VMMI_Rating) %>% droplevels()
       
     } else {
-      sppmap %>% filter(Label == MarkerClick$id) %>% select(Latin_Name, Common) %>% droplevels()
+      sppmap %>% filter(Label == MarkerClick$id) %>% 
+        select(Latin_Name, Common, HGM_Class:Cowardin_Class) %>% droplevels()
     }
     
     content <-
-      paste0("<b>", h4(
-        "Site: ",
-        if(site$Site_Type == 'Sentinel'){paste0(site$Label, " (Sentinel)")
+      paste0("<b>", h4("Site: ",if(site$Site_Type == 'Sentinel'){paste0(site$Label, " (Sentinel)")
           } else { if(site$Site_Type == 'RAM'){
           paste0(site$Label)}}
-      ), "</b>", 
-      
+      ), "</b>",
       if (input$DataGroup == 'vmmi') {
         tagList(tags$table(
           class = 'table',
@@ -119,27 +118,16 @@ shinyServer <- function(input, output, session) {
             )
           )
         ))
-        
+      } else {
+      if (input$DataGroup == 'spplist'){
+        paste0(
+        h5("HGM Class:", paste0(site$HGM_Class)), 
+        h5("HGM Subclass:", paste0(site$HGM_Subclass)),
+        h5("Cowardin:", paste0(site$Cowardin_Class))
+        )}
       }
       ) # end of paste0
-    # else if (input$DataGroup == 'spplist') {
-      #  tagList(tags$table(tags$thead(
-      #    tags$th('Latin Name'), tags$th('Common')
-      #  )#,
-        #tags$tbody(
-        #  mapply(
-        #    FUN = function(Latin, Common, Freq) {
-        #      tags$tr(tags$td(sprintf("%s ", Latin)),
-        #              tags$td(align = 'right', sprintf("%s", Common)))
-        #    },
-        #    Latin = tempdata$Latin_Name,
-        #    Common = tempdata$Common,
-        #    SIMPLIFY = FALSE
-        #  )
-        #) # end of tags body
-       # ))
-      #}
-      #)
+    
     
     leafletProxy("WetlandMap") %>%
       clearPopups() %>%
