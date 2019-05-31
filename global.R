@@ -22,7 +22,7 @@ sampleyears<-c(2011,2014,2015,2017,2018) # most recent survey of available data
 DataTypes<-list(vmmi='Veg. MMI', spplist='Spp. List')
 
 # Prep veg data for Map panel
-vmmimap<-merge(sitedata,vmmi,by=c('Label'),all.x=T, all.y=T) %>% mutate_at(vars(Mean_C:VMMI),.~round(.,1)) %>% 
+vmmimap<-merge(sitedata,vmmi,by=c('Label'),all.x=T, all.y=T) %>% mutate_at(vars(Mean_C:VMMI),list(~round(.,1))) %>% 
   mutate(VMMI_Rating=factor(VMMI_Rating, levels=c('Good','Fair','Poor'))) %>% arrange(Site_Type,Label) %>% 
   filter(Year %in% sampleyears) %>% select(Label,Site_Type,Longitude,Latitude,Year,Mean_C:VMMI_Rating)
 

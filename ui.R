@@ -36,8 +36,10 @@ shinyUI(
                                  label = 'Select a species:',
                                  choices = c('All', spplistall)
                                )
-                             ))
-          )
+                             )),
+            downloadButton("downloadData", "Download")
+          
+            )
         ),
         column(10, style = "padding: 0",
                div(leafletOutput("WetlandMap", height = "700px")

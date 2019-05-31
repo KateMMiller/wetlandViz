@@ -180,6 +180,15 @@ shinyServer <- function(input, output, session) {
       )
   }) 
   
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste(input$DataGroup, ".csv", sep="")
+    },
+    content = function(file){
+      write.csv(MapData(), file, row.names=F)
+    }
+  )
+  
   # End of controls for Wetland Map
   
   #-------------------------------
