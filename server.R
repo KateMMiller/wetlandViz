@@ -1,3 +1,5 @@
+devtools::install_github('katemmiller/wetlandACAD')
+option(repos = list(CRAN = "https://cloud.r-project.org", myrepo = "https://github.com/katemmiller/wetlandACAD"))
 library(wetlandACAD)
 library(shiny)
 library(dplyr)

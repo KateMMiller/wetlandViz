@@ -1,6 +1,5 @@
 library(shiny)
 library(leaflet)
-library(mapview)
 
 shinyUI(
   navbarPage(
