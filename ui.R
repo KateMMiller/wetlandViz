@@ -1,5 +1,6 @@
 library(shiny)
 library(leaflet)
+library(mapview)
 
 shinyUI(
   navbarPage(
@@ -42,7 +43,7 @@ shinyUI(
             )
         ),
         column(10, style = "padding: 0",
-               div(leafletOutput("WetlandMap", height = "700px")
+               div(leafletOutput("WetlandMap", height = "800px")
                ))
       ) # end fluidRow
     ),#end tabPanel

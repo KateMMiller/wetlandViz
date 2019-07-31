@@ -14,15 +14,17 @@ shinyServer <- function(input, output, session) {
   output$WetlandMap <- renderLeaflet({
     leaflet() %>%
       setView(
-        lng = mean(-68.711,-67.953),
-        lat = mean(44.484, 43.953),
+        lng = -68.312,
+        lat = 44.343,
+        #lng = mean(-68.711,-67.953),
+        #lat = mean(44.484, 43.953),
         zoom = 10
       ) %>%
       setMaxBounds(
-        lng1 = -68.711,
-        lng2 = -67.953,
-        lat1 = 44.484,
-        lat2 = 43.953
+        lng1 = -69,
+        lng2 = -67.5,
+        lat1 = 44.9,
+        lat2 = 43.5
       )
   })
   
@@ -88,7 +90,10 @@ shinyServer <- function(input, output, session) {
   observeEvent(input$WetlandMap_marker_click, {
     MarkerClick <- input$WetlandMap_marker_click
     site <- MapData()[MapData()$Label == MarkerClick$id, ]
-    
+    photoN<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
+                            mutate(photoN = paste0(North_View, '.jpg')) %>%  
+      select(photoN) %>% droplevels())
+
     tempdata <- if (input$DataGroup == 'vmmi') {
       vmmimap %>% filter(Label == MarkerClick$id) %>% select(Mean_C:VMMI_Rating) %>% droplevels()
       
@@ -112,13 +117,15 @@ shinyServer <- function(input, output, session) {
                 tags$tr(tags$td(sprintf("%s: ", Name)),
                         tags$td(align = 'right', sprintf("%s", Value)))
               },
-              Name = names(tempdata),
-              Value = tempdata,
+              Name = names(tempdata[,5:6]),
+              Value = tempdata[,5:6],
               SIMPLIFY = FALSE
-            )
+            ) #end of mapply
+            ) #end of tags$tbody          
+          ), tags$img(src=photoN, height=200, width=275)
+          #tags$a('North', type='image/jpg', href=tags$img(src=photoN, alt='North photopoint', height=225, width=300))
           )
-        ))
-      } else {
+        } else {
       if (input$DataGroup == 'spplist'){
         paste0(
         h5("HGM Class:", paste0(site$HGM_Class)), 
@@ -140,6 +147,7 @@ shinyServer <- function(input, output, session) {
       )
   })
   
+  # Make photopoints reactive
   # Make Attribution
   NPSAttrib <-
     HTML(
@@ -179,6 +187,8 @@ shinyServer <- function(input, output, session) {
         options = layersControlOptions(collapsed = T)
       )
   }) 
+  
+  
   
   output$downloadData <- downloadHandler(
     filename = function() {
