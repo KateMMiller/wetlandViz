@@ -85,7 +85,8 @@ shinyUI(
           )
         ),
         #end sidebarpanel
-        mainPanel(
+       # mainPanel(
+       column(10,
           h4("Wetland Hydrographs"),
           plotOutput("hydroPlot", width = '100%', height = "700px")
         )

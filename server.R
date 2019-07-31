@@ -117,12 +117,13 @@ shinyServer <- function(input, output, session) {
                 tags$tr(tags$td(sprintf("%s: ", Name)),
                         tags$td(align = 'right', sprintf("%s", Value)))
               },
-              Name = names(tempdata[,5:6]),
-              Value = tempdata[,5:6],
+              Name = names(tempdata[,1:6]),
+              Value = tempdata[,1:6],
               SIMPLIFY = FALSE
             ) #end of mapply
             ) #end of tags$tbody          
-          ), tags$img(src=photoN, height=200, width=275)
+          ),
+          tags$img(src=photoN, height=180, width=250)
           #tags$a('North', type='image/jpg', href=tags$img(src=photoN, alt='North photopoint', height=225, width=300))
           )
         } else {
