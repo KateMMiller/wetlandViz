@@ -35,17 +35,23 @@ shinyServer <- function(input, output, session) {
       df <- vmmimap %>% select(Site_Type, Label, Latitude, Longitude, Mean_C, Pct_Cov_TolN, 
                                Sphagnum_Cover, Invasive_Cover, VMMI, VMMI_Rating)
     } else {
-      if(input$DataGroup == 'spplist' & input$Species == 'All'){
+      if(input$DataGroup == 'spplist' & input$Species == 'All species'){
       df <- sppfull %>% select(Site_Type, Label, Latitude, Longitude, Latin_Name, Present, HGM_Class:Cowardin_Class)
       
       } else {
         
-        if(input$DataGroup == 'spplist' & input$Species !='All'){
+        if(input$DataGroup == 'spplist' & input$Species !='All species' & input$Species !='Invasive species'){
       df<- sppfull %>% select(Site_Type, Label, Latitude, Longitude, Latin_Name, Present, HGM_Class:Cowardin_Class) %>% 
             filter(Latin_Name %in% input$Species) %>% droplevels() 
-        }
+      
+      } else {
+        
+        if(input$DataGroup == 'spplist' & input$Species == 'Invasive species'){
+      df<- sppinv %>% select(Site_Type, Label, Latitude, Longitude, inv_present) %>% droplevels()
+       }
+      } 
       }
-    } 
+    }
     return(df)
   })
   
@@ -57,13 +63,18 @@ shinyServer <- function(input, output, session) {
       
     } else if (input$DataGroup == 'spplist') {
       
-      if(input$Species == 'All'){
+      if(input$Species == 'All species'){
       colorData <- MapData()$Site_Type
       pal <- colorFactor(palette = c("DodgerBlue","ForestGreen"), domain=c('Sentinel','RAM'))}
       
-      if(input$Species != 'All'){
+      if(input$Species != 'All species' & input$Species != 'Invasive species'){
       colorData <- MapData()$Present
       pal <- colorFactor(palette = c('DimGrey', "green"), levels=c("Absent","Present"))
+      }
+      
+      if(input$Species == 'Invasive species'){
+        colorData <- MapData()$inv_present
+        pal <- colorFactor(palette=c('DimGrey','green'), levels=c('Absent','Present'))
       }
       
     }
@@ -73,6 +84,8 @@ shinyServer <- function(input, output, session) {
       clearControls() %>%
       addCircleMarkers(
         data = MapData(),
+        #label = ~MapData()$Label,
+        #labelOptions = labelOptions(noHide=TRUE, offset=c(12,-12), textOnly=TRUE),
         radius = 10,
         lng = MapData()$Longitude,
         lat = MapData()$Latitude,
@@ -86,8 +99,8 @@ shinyServer <- function(input, output, session) {
     
   })
   
-  #output$SitePhoto <- renderImage({})
-  
+
+# Add photopoints below MapPanel if plot is clicked on
   observeEvent(input$WetlandMap_marker_click,{
     
     MarkerClick <- input$WetlandMap_marker_click
@@ -117,9 +130,8 @@ shinyServer <- function(input, output, session) {
     output$Photo_W <- renderUI(tags$img(src=photoW, height='275px'))
   })
 
-#  output$PhotoN <-renderUI(img(src=photoN(), height='300px',width='400px'))
-    
-  # Set up popups for vmmi ratings or species list
+
+# Set up popups for vmmi ratings or species list
   observeEvent(input$WetlandMap_marker_click, {
     MarkerClick <- input$WetlandMap_marker_click
     site <- MapData()[MapData()$Label == MarkerClick$id, ]
@@ -127,9 +139,13 @@ shinyServer <- function(input, output, session) {
     tempdata <- if (input$DataGroup == 'vmmi') {
       vmmimap %>% filter(Label == MarkerClick$id) %>% select(Mean_C:VMMI_Rating) %>% droplevels()
       
-    } else {
+    } else { if(input$DataGroup=='spplist' & input$Species!='Invasive species'){
       sppmap %>% filter(Label == MarkerClick$id) %>% 
-        select(Latin_Name, Common, HGM_Class:Cowardin_Class) %>% droplevels()
+        select(Latin_Name, Common, HGM_Class:Cowardin_Class) %>% droplevels()}
+      else { 
+      sppmap %>% filter(Label == MarkerClick$id) %>% mutate(inv_pres= ifelse(Invasive==T & PctFreq>0,1,0)) %>% 
+          select(Latin_Name, inv_pres) %>% filter(inv_pres>0) %>% spread(Latin_Name, inv_pres)
+        }
     }
     
     content <-
@@ -142,25 +158,42 @@ shinyServer <- function(input, output, session) {
           class = 'table',
           tags$thead(tags$th('Metric'), tags$th("Values")),
           tags$tbody(
-            mapply(
-              FUN = function(Name, Value) {
+            mapply(FUN = function(Name, Value) {
                 tags$tr(tags$td(sprintf("%s: ", Name)),
                         tags$td(align = 'right', sprintf("%s", Value)))
               },
               Name = names(tempdata[,1:6]),
               Value = tempdata[,1:6],
-              SIMPLIFY = FALSE
-            ) #end of mapply
+              SIMPLIFY = FALSE ) #end of mapply 
             ) #end of tags$tbody          
-          )# end of tags$table
+          ) # end of tags$table
           ) #end of tagList
         } else {
-      if (input$DataGroup == 'spplist'){
-        paste0(
-        h5("HGM Class:", paste0(site$HGM_Class)), 
-        h5("HGM Subclass:", paste0(site$HGM_Subclass)),
-        h5("Cowardin:", paste0(site$Cowardin_Class))
-        )}
+      if (input$DataGroup == 'spplist' & input$Species != 'Invasive species'){
+        paste0(h5("HGM Class:", paste0(site$HGM_Class)), h5("HGM Subclass:", paste0(site$HGM_Subclass)),
+        h5("Cowardin:", paste0(site$Cowardin_Class)))
+      } else {
+          if (input$DataGroup =='spplist' & input$Species == 'Invasive species'){
+            if(nrow(tempdata)==0){h5("No invasive species detections")
+            } else {
+            paste0(
+              h5("Invasive species detected:"),
+              tagList(tags$table(
+                tags$tbody(
+                #as.list(names(tempdata))
+                mapply(
+                  FUN =function(Name){
+                    tags$tr(tags$td(sprintf("%s", Name)))
+                  },
+                  Name = names(tempdata),
+                  SIMPLIFY = FALSE
+                )
+              ) # end of tags body
+              ))
+              
+            )
+          }}
+        }
       }
       ) # end of paste0
     
@@ -248,7 +281,7 @@ shinyServer <- function(input, output, session) {
   # Species List Tab Controls
   #-------------------------------
   spptable<-reactive({
-     spplisttbl<- sppmap %>% filter(Label==input$WetlandSite) %>% select(Latin_Name, Common) %>% droplevels()
+     spplisttbl<- sppmap %>% filter(Label==input$WetlandSite) %>% select(Latin_Name, Common, Invasive) %>% droplevels()
      return(spplisttbl)
   })
   

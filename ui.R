@@ -35,7 +35,7 @@ shinyUI(
                                selectInput(
                                  inputId = "Species",
                                  label = 'Select a species:',
-                                 choices = c('All', spplistall)
+                                 choices = c('All species', 'Invasive species', spplistall)
                                )
                              )),
             downloadButton("downloadData", "Download")
