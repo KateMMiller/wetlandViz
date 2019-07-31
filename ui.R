@@ -43,9 +43,19 @@ shinyUI(
             )
         ),
         column(10, style = "padding: 0",
-               div(leafletOutput("WetlandMap", height = "800px")
-               ))
-      ) # end fluidRow
+               div(leafletOutput("WetlandMap", height = "600px")
+               )), br(),
+        column(3, style= "padding: 5px 10px", div(id= "North", uiOutput(outputId="Photo_N", height = "350px", 
+                                                                       title='View North'))),
+        column(3, style= "padding: 5px 10px", div(id= "East", uiOutput(outputId="Photo_E",  height = "350px",
+                                                                       title='View East'))),
+        column(3, style= "padding: 5px 10px", div(id= "South", uiOutput(outputId="Photo_S", height = "350px",
+                                                                        title='View South'))),
+        column(3, style= "padding: 5px 10px", div(id= "West", uiOutput(outputId="Photo_W",  height = "350px",
+                                                                       title='View West')))
+        
+      
+        ) # end fluidRow
     ),#end tabPanel
     
     

@@ -15,7 +15,7 @@ shinyServer <- function(input, output, session) {
     leaflet() %>%
       setView(
         lng = -68.312,
-        lat = 44.343,
+        lat = 44.25,
         #lng = mean(-68.711,-67.953),
         #lat = mean(44.484, 43.953),
         zoom = 10
@@ -86,14 +86,44 @@ shinyServer <- function(input, output, session) {
     
   })
   
+  #output$SitePhoto <- renderImage({})
+  
+  observeEvent(input$WetlandMap_marker_click,{
+    
+    MarkerClick <- input$WetlandMap_marker_click
+    
+    photoN<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
+                            mutate(photoN = paste0(North_View, '.jpg')) %>%  
+                            select(photoN) %>% droplevels())
+
+    output$Photo_N <- renderUI(tags$img(src=photoN, height='275px'))
+    
+    photoE<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
+                            mutate(photoE = paste0(East_View, '.jpg')) %>%  
+                            select(photoE) %>% droplevels())
+    
+    output$Photo_E <- renderUI(tags$img(src=photoE, height='275px'))
+    
+    photoS<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
+                            mutate(photoS = paste0(South_View, '.jpg')) %>%  
+                            select(photoS) %>% droplevels())
+    
+    output$Photo_S <- renderUI(tags$img(src=photoS, height='275px'))
+    
+    photoW<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
+                            mutate(photoW = paste0(West_View, '.jpg')) %>%  
+                            select(photoW) %>% droplevels())
+    
+    output$Photo_W <- renderUI(tags$img(src=photoW, height='275px'))
+  })
+
+#  output$PhotoN <-renderUI(img(src=photoN(), height='300px',width='400px'))
+    
   # Set up popups for vmmi ratings or species list
   observeEvent(input$WetlandMap_marker_click, {
     MarkerClick <- input$WetlandMap_marker_click
     site <- MapData()[MapData()$Label == MarkerClick$id, ]
-    photoN<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
-                            mutate(photoN = paste0(North_View, '.jpg')) %>%  
-      select(photoN) %>% droplevels())
-
+    
     tempdata <- if (input$DataGroup == 'vmmi') {
       vmmimap %>% filter(Label == MarkerClick$id) %>% select(Mean_C:VMMI_Rating) %>% droplevels()
       
@@ -122,10 +152,8 @@ shinyServer <- function(input, output, session) {
               SIMPLIFY = FALSE
             ) #end of mapply
             ) #end of tags$tbody          
-          ),
-          tags$img(src=photoN, height=180, width=250)
-          #tags$a('North', type='image/jpg', href=tags$img(src=photoN, alt='North photopoint', height=225, width=300))
-          )
+          )# end of tags$table
+          ) #end of tagList
         } else {
       if (input$DataGroup == 'spplist'){
         paste0(
@@ -145,7 +173,7 @@ shinyServer <- function(input, output, session) {
         lng = site$Longitude,
         layerId = "MarkerClickPopup",
         popup = content
-      )
+      ) 
   })
   
   # Make photopoints reactive
