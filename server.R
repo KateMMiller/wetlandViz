@@ -1,5 +1,3 @@
-devtools::install_github('katemmiller/wetlandACAD')
-option(repos = list(CRAN = "https://cloud.r-project.org", myrepo = "https://github.com/katemmiller/wetlandACAD"))
 library(wetlandACAD)
 library(shiny)
 library(dplyr)
@@ -7,7 +5,7 @@ library(leaflet)
 library(shinyjs)
 library(tidyr)
 
-shinyServer <- function(input, output, session) {
+server <- function(input, output) {
   #-----------------------------
   # Wetland Map Controls
   #-----------------------------
