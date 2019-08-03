@@ -122,9 +122,17 @@ ui<-shinyUI(
           h4("Species Lists by Site"),
           tableOutput("SpeciesList")
         ) # end mainPanel
-      ) # end fluidRoq
+      ) # end fluidRow
       
-    )# end of species list tabpanel
-    
+    ), # end of species tab panel
+    #--------------------------------------------------------------
+    #          For About Tab
+    #--------------------------------------------------------------
+    tabPanel(
+      tags$div(
+      h4("About", align = 'center'), style = "padding: 0"),
+      includeHTML("./www/About.html")
+      # end of About list tabpanel
+    )
     ) # end of navbarpage
 ) # end shinyUI
