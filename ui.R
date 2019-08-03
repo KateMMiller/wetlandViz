@@ -44,10 +44,10 @@ ui<-shinyUI(
         column(10, style = "padding: 0",
                div(leafletOutput("WetlandMap", height = "600px")
                )), br(),
-        column(3, style= "padding: 5px 10px", div(id= "North", uiOutput(outputId="Photo_N", height = "350px"))),
-        column(3, style= "padding: 5px 10px", div(id= "East", uiOutput(outputId="Photo_E",  height = "350px"))),
-        column(3, style= "padding: 5px 10px", div(id= "South", uiOutput(outputId="Photo_S", height = "350px"))),
-        column(3, style= "padding: 5px 10px", div(id= "West", uiOutput(outputId="Photo_W",  height = "350px")))
+        column(3, style= "padding: 5px 10px", div(id= "North", htmlOutput(outputId="Photo_N"))),
+        column(3, style= "padding: 5px 10px", div(id= "East", htmlOutput(outputId="Photo_E"))),
+        column(3, style= "padding: 5px 10px", div(id= "South", htmlOutput(outputId="Photo_S"))),
+        column(3, style= "padding: 5px 10px", div(id= "West", htmlOutput(outputId="Photo_W")))
         
       
         ) # end fluidRow

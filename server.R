@@ -109,26 +109,31 @@ server <- function(input, output) {
                             mutate(photoN = paste0(North_View, '.jpg')) %>%  
                             select(photoN) %>% droplevels())
 
-    output$Photo_N <- renderUI(tags$img(src=photoN, height='275px'))
+    #output$Photo_N<-renderUI(tags$img(src = photoN, height='275px'))
+    output$Photo_N <- renderText({c('<img src="', photoN, '" height="250">')})
+    
     
     photoE<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
                             mutate(photoE = paste0(East_View, '.jpg')) %>%  
                             select(photoE) %>% droplevels())
     
-    output$Photo_E <- renderUI(tags$img(src=photoE, height='275px'))
+    #output$Photo_E <- renderUI(tags$img(src = photoE, height='275px'))
+    output$Photo_E <- renderText({c('<img src="', photoE, '" height="250">')})
     
     photoS<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
                             mutate(photoS = paste0(South_View, '.jpg')) %>%  
                             select(photoS) %>% droplevels())
     
-    output$Photo_S <- renderUI(tags$img(src=photoS, height='275px'))
+    #output$Photo_S <- renderUI(tags$img(src = photoS, height='275px'))
+    output$Photo_S <- renderText({c('<img src="', photoS, '" height="250">')})
     
     photoW<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
                             mutate(photoW = paste0(West_View, '.jpg')) %>%  
                             select(photoW) %>% droplevels())
     
-    output$Photo_W <- renderUI(tags$img(src=photoW, height='275px'))
-  })
+    #output$Photo_W <- renderUI(tags$img(src = photoW, height='275px'))
+    output$Photo_W <- renderText({c('<img src="', photoW, '" height="250">')})
+    })
 
 
 # Set up popups for vmmi ratings or species list
