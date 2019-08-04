@@ -31,53 +31,56 @@ server <- function(input, output) {
   # Plot wetland points on map
   # Select data to map on plot
   MapData <- reactive({
-    if (input$DataGroup == 'vmmi') {
-      df <- vmmimap %>% select(Site_Type, Label, Latitude, Longitude, Mean_C, Pct_Cov_TolN, 
-                               Sphagnum_Cover, Invasive_Cover, VMMI, VMMI_Rating)
-    } else {
-      if(input$DataGroup == 'spplist' & input$Species == 'All species'){
-      df <- sppfull %>% select(Site_Type, Label, Latitude, Longitude, Latin_Name, Present, HGM_Class:Cowardin_Class)
-      
-      } else {
-        
-        if(input$DataGroup == 'spplist' & input$Species !='All species' & input$Species !='Invasive species'){
-      df<- sppfull %>% select(Site_Type, Label, Latitude, Longitude, Latin_Name, Present, HGM_Class:Cowardin_Class) %>% 
-            filter(Latin_Name %in% input$Species) %>% droplevels() 
-      
-      } else {
-        
-        if(input$DataGroup == 'spplist' & input$Species == 'Invasive species'){
-      df<- sppinv %>% select(Site_Type, Label, Latitude, Longitude, inv_present) %>% droplevels()
-       }
-      } 
-      }
-    }
-    return(df)
+    df<-switch(input$DataGroup,
+           "vmmi" = vmmimap %>% select(Site_Type, Label, Latitude, Longitude, Mean_C, Pct_Cov_TolN, 
+                                       Sphagnum_Cover, Invasive_Cover, VMMI, VMMI_Rating),
+           
+           "sitetype" = sitemap %>% select(Site_Type, Label, Latitude, Longitude, Year, HGM_Class,
+                                           HGM_Subclass, Cowardin_Class),
+           
+           "spplist"= 
+             switch(input$SppType,
+                    "allspp"=
+                      if(input$Species !='Select a species'){
+                        sppfull %>% select(Site_Type, Label, Latitude, Longitude, Year,
+                                           Latin_Name, Present, HGM_Class:Cowardin_Class) %>% 
+                          filter(Latin_Name %in% input$Species)     
+                      } else {
+                        sitemap %>% select(Site_Type, Label, Latitude, Longitude, Year, HGM_Class,
+                                           HGM_Subclass, Cowardin_Class)
+                      },
+                    "invspp"=     
+                      sppinv %>% select(Site_Type, Label, Latitude, Longitude, inv_present) %>% 
+                      droplevels()
+                     )
+           )
+      return(df)
   })
   
   # Set up color palette and filter for colors on map
   observe({
     if (input$DataGroup == 'vmmi') {
       colorData <- MapData()$VMMI_Rating
-      pal <- colorFactor(palette = c('green', 'yellow', 'FireBrick'), levels=c('Good','Fair','Poor'))
-      
-    } else if (input$DataGroup == 'spplist') {
-      
-      if(input$Species == 'All species'){
+      pal <- colorFactor(palette = c('green', 'yellow', 'FireBrick'), 
+                         levels=c('Good','Fair','Poor'))} 
+    if (input$DataGroup == 'sitetype') {
       colorData <- MapData()$Site_Type
-      pal <- colorFactor(palette = c("DodgerBlue","ForestGreen"), domain=c('Sentinel','RAM'))}
-      
-      if(input$Species != 'All species' & input$Species != 'Invasive species'){
-      colorData <- MapData()$Present
-      pal <- colorFactor(palette = c('DimGrey', "green"), levels=c("Absent","Present"))
-      }
-      
-      if(input$Species == 'Invasive species'){
+      pal <- colorFactor(palette = c("DodgerBlue","ForestGreen"), domain=c('Sentinel','RAM'))} 
+    
+   if (input$DataGroup == 'spplist') {
+    
+      if(input$SppType == 'allspp' & input$Species!='Select a species'){
+        colorData <- MapData()$Present
+        pal <- colorFactor(palette = c("DimGrey","green"), domain=c('Absent','Present'))}
+
+      if(input$SppType == 'allspp' & input$Species=='Select a species'){
+        colorData <- MapData()$Site_Type
+        pal <- colorFactor(palette = c("DodgerBlue","ForestGreen"), domain=c('Sentinel','RAM'))}    
+        
+      if(input$SppType == 'invspp'){
         colorData <- MapData()$inv_present
-        pal <- colorFactor(palette=c('DimGrey','green'), levels=c('Absent','Present'))
+        pal <- colorFactor(palette=c('DimGrey','green'), levels=c('Absent','Present'))}
       }
-      
-    }
     
     leafletProxy("WetlandMap") %>%
       clearShapes() %>%
@@ -109,7 +112,6 @@ server <- function(input, output) {
                             mutate(photoN = paste0(North_View, '.gif')) %>%  
                             select(photoN) %>% droplevels())
 
-    #output$Photo_N<-renderUI(tags$img(src = photoN, height='275px'))
     output$Photo_N <- renderText({c('<img src="',photoN,'" height="250"/>')})
     
     
@@ -117,42 +119,41 @@ server <- function(input, output) {
                             mutate(photoE = paste0(East_View, '.gif')) %>%  
                             select(photoE) %>% droplevels())
     
-    #output$Photo_E <- renderUI(tags$img(src = photoE, height='275px'))
     output$Photo_E <- renderText({c('<img src="',photoE,'" height="250"/>')})
     
     photoS<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
                             mutate(photoS = paste0(South_View, '.gif')) %>%  
                             select(photoS) %>% droplevels())
     
-    #output$Photo_S <- renderUI(tags$img(src = photoS, height='275px'))
     output$Photo_S <- renderText({c('<img src="',photoS,'" height="250"/>')})
     
     photoW<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
                             mutate(photoW = paste0(West_View, '.gif')) %>%  
                             select(photoW) %>% droplevels())
     
-    #output$Photo_W <- renderUI(tags$img(src = photoW, height='275px'))
     output$Photo_W <- renderText({c('<img src="',photoW,'" height="250"/>')})
     })
-
 
 # Set up popups for vmmi ratings or species list
   observeEvent(input$WetlandMap_marker_click, {
     MarkerClick <- input$WetlandMap_marker_click
     site <- MapData()[MapData()$Label == MarkerClick$id, ]
     
-    tempdata <- if (input$DataGroup == 'vmmi') {
-      vmmimap %>% filter(Label == MarkerClick$id) %>% select(Mean_C:VMMI_Rating) %>% droplevels()
-      
-    } else { if(input$DataGroup=='spplist' & input$Species!='Invasive species'){
-      sppmap %>% filter(Label == MarkerClick$id) %>% 
-        select(Latin_Name, Common, HGM_Class:Cowardin_Class) %>% droplevels()}
-      else { 
-      sppmap %>% filter(Label == MarkerClick$id) %>% mutate(inv_pres= ifelse(Invasive==T & PctFreq>0,1,0)) %>% 
-          select(Latin_Name, inv_pres) %>% filter(inv_pres>0) %>% spread(Latin_Name, inv_pres)
-        }
-    }
-    
+    tempdata <- 
+        if (input$DataGroup == 'vmmi') {
+           vmmimap %>% filter(Label == MarkerClick$id) %>% 
+                       select(Mean_C:VMMI_Rating) %>% droplevels()} 
+        
+        else if(input$DataGroup=='sitetype'){
+           sitemap %>% filter(Label == MarkerClick$id) %>% 
+                      select(Site_Type, Year, HGM_Class, HGM_Subclass, Cowardin_Class)}
+
+        else if(input$DataGroup=='spplist' & input$SppType=='invspp'){
+            sppmap %>% filter(Label == MarkerClick$id) %>% 
+            mutate(species=ifelse(Invasive==TRUE, paste(Latin_Name),paste('No invasives'))) %>% 
+            select(species) %>% unique() %>% droplevels()}
+          
+
     content <-
       paste0("<b>", h4("Site: ",if(site$Site_Type == 'Sentinel'){paste0(site$Label, " (Sentinel)")
           } else { if(site$Site_Type == 'RAM'){
@@ -172,34 +173,38 @@ server <- function(input, output) {
               SIMPLIFY = FALSE ) #end of mapply 
             ) #end of tags$tbody          
           ) # end of tags$table
-          ) #end of tagList
-        } else {
-      if (input$DataGroup == 'spplist' & input$Species != 'Invasive species'){
-        paste0(h5("HGM Class:", paste0(site$HGM_Class)), h5("HGM Subclass:", paste0(site$HGM_Subclass)),
-        h5("Cowardin:", paste0(site$Cowardin_Class)))
-      } else {
-          if (input$DataGroup =='spplist' & input$Species == 'Invasive species'){
-            if(nrow(tempdata)==0){h5("No invasive species detections")
-            } else {
-            paste0(
-              h5("Invasive species detected:"),
-              tagList(tags$table(
-                tags$tbody(
-                #as.list(names(tempdata))
-                mapply(
-                  FUN =function(Name){
-                    tags$tr(tags$td(sprintf("%s", Name)))
-                  },
-                  Name = names(tempdata),
-                  SIMPLIFY = FALSE
-                )
-              ) # end of tags body
-              ))
-              
-            )
-          }}
+        ) #end of tagList
+      },
+      
+      if (input$DataGroup=='sitetype'){
+        paste0(h5("HGM Class:", paste0(site$HGM_Class)), 
+               h5("HGM Subclass:", paste0(site$HGM_Subclass)),
+               h5("Cowardin:", paste0(site$Cowardin_Class)),
+               h5("Sample Year:", paste0(site$Year)))},
+      
+      if (input$DataGroup == 'spplist'){
+        
+        if(input$SppType=='allspp'){
+         paste0(h5("HGM Class:", paste0(site$HGM_Class)), 
+               h5("HGM Subclass:", paste0(site$HGM_Subclass)),
+               h5("Cowardin:", paste0(site$Cowardin_Class)),
+               h5("Sample Year:", paste0(site$Year)))} 
+        
+        else if(input$SppType=='invspp'){
+          paste0(h5("Invasive Detections:", br(),
+                    paste0(
+                    if(nrow(tempdata)==1){paste("None detected")}
+            else if(nrow(tempdata)>0) {paste(tempdata %>% 
+                                                filter(species!= 'No invasives') %>% 
+                                                droplevels() %>% select(species) %>% unlist(), 
+                                             collapse=", ")}
+          ) # STILL ONLY SHOWS FIRST INVASIVE SPECIES PRESENT
+          )
+          )
+             }  
+        
         }
-      }
+
       ) # end of paste0
     
     

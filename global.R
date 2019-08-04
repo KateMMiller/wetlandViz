@@ -18,8 +18,9 @@ sentsites<-data.frame(sitename=c("Big Heath", "Duck Pond", "Gilmore Meadow", "He
 vmmi<-read.csv('./data/vmmi_2019.csv') #includes 2019 data
 sppdata<-read.csv("./data/Sentinel_and_RAM_species_data_2011-2019.csv")
 sampleyears<-c(2011,2015,2017,2018,2019) # most recent survey of available data
-
 DataTypes<-list(vmmi='Veg. MMI', spplist='Spp. List')
+sitemap<-merge(sitedata,vmmi[,c("Label","Year")], by='Label', all.x=T) %>% 
+  filter(Year %in% sampleyears) %>% droplevels()
 
 # Prep veg data for Map panel
 vmmimap<-merge(sitedata,vmmi,by=c('Label'),all.x=T, all.y=T) %>% mutate_at(vars(Mean_C:VMMI),list(~round(.,1))) %>% 
@@ -34,16 +35,16 @@ sppmap<-sppmap1 %>% filter(Year %in% sampleyears) %>% arrange(Label, Latin_Name,
 spplistall<-noquote(as.character(levels(sppmap$Latin_Name)))
 
 sppfull <- sppmap %>% select(-Common, -Invasive) %>% mutate(present=ifelse(PctFreq>0,'Present','Absent')) %>% 
-  select(Label:Site_Type,Latin_Name, present, HGM_Class:Cowardin_Class) %>% 
+  select(Label:Site_Type,Latin_Name, Year, present, HGM_Class:Cowardin_Class) %>% 
                              spread(Latin_Name,present,fill='Absent') %>% 
-  gather("Latin_Name","Present", -Label,-Longitude,-Latitude,-Site_Type, 
+  gather("Latin_Name","Present", -Label,-Longitude,-Latitude,-Site_Type, -Year,
          -HGM_Class, -HGM_Subclass, -Cowardin_Class)
 
 sppinv <- sppmap %>%  mutate(inv_num=ifelse(PctFreq>0 & Invasive==TRUE, 1, 0)) %>% 
   select(Label:Site_Type, inv_num) %>% group_by(Label, Longitude, Latitude, Site_Type) %>% 
   summarise(num_inv=sum(inv_num), inv_present=ifelse(num_inv>0,'Present','Absent'))
 
-head(sppmap)
+head(sppinv)
 
 
 plotlist1<-vmmimap %>% arrange(desc(Site_Type), Label) 
