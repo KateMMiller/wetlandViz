@@ -26,15 +26,24 @@ ui<-shinyUI(
               selectInput(
                 inputId = 'DataGroup',
                 label = 'Type of data:',
-                choices = c('Veg MMI' = 'vmmi', 'By Species' = 'spplist')
+                choices = c('Veg MMI' = 'vmmi', 
+                            'By Site Type' = 'sitetype',
+                            'By Species' = 'spplist' 
+                            )
               )
             ),
             conditionalPanel(condition = "input.DataGroup=='spplist'",
+                             radioButtons(inputId='SppType', label='Species type:',
+                                          choices=c('All species'='allspp', 
+                                                    'Invasive species'='invspp')
+                             )
+                             ),
+            conditionalPanel(condition = "input.DataGroup=='spplist' & input.SppType=='allspp'",
                              tags$div(title = "Select a species",
                                selectInput(
                                  inputId = "Species",
                                  label = 'Select a species:',
-                                 choices = c('All species', 'Invasive species', spplistall)
+                                 choices = c('Select a species', spplistall)
                                )
                              )),
             downloadButton("downloadData", "Download")
