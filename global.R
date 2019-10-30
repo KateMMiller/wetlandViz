@@ -7,7 +7,7 @@ library(dplyr)
 library(tidyr)
 
 # Pull in water level data
-welld<-read.csv('./data/well_prec_data_2013-2018.csv')
+welld<-read.csv('./data/well_prec_data_2013-2019.csv')
 sitedata<-read.csv('./data/Sentinel_and_USA-RAM_Sites.csv')
 
 sentsites<-data.frame(sitename=c("Big Heath", "Duck Pond", "Gilmore Meadow", "Heath Brook", 
@@ -45,7 +45,6 @@ sppinv <- sppmap %>%  mutate(inv_num=ifelse(PctFreq>0 & Invasive==TRUE, 1, 0)) %
   summarise(num_inv=sum(inv_num), inv_present=ifelse(num_inv>0,'Present','Absent'))
 
 head(sppinv)
-
 
 plotlist1<-vmmimap %>% arrange(desc(Site_Type), Label) 
 plotlist<-noquote(as.character(unique(plotlist1$Label)))

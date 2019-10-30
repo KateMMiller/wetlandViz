@@ -28,6 +28,8 @@ server <- function(input, output) {
       )
   })
   
+  
+  
   # Plot wetland points on map
   # Select data to map on plot
   MapData <- reactive({
@@ -84,6 +86,7 @@ server <- function(input, output) {
     
     leafletProxy("WetlandMap") %>%
       clearShapes() %>%
+      clearPopups() %>% 
       clearControls() %>%
       addCircleMarkers(
         data = MapData(),
@@ -133,6 +136,7 @@ server <- function(input, output) {
     
     output$Photo_W <- renderText({c('<img src="',photoW,'" height="250"/>')})
     })
+
 
 # Set up popups for vmmi ratings or species list
   observeEvent(input$WetlandMap_marker_click, {
@@ -219,6 +223,7 @@ server <- function(input, output) {
       ) 
   })
   
+
   # Make photopoints reactive
   # Make Attribution
   NPSAttrib <-
@@ -231,6 +236,20 @@ server <- function(input, output) {
       target='_blank'>Improve Park Tiles</a>"
     )
   
+  # Reset view of map panel
+  observe({
+    input$reset_view
+    leafletProxy("WetlandMap") %>% 
+      clearPopups() %>% 
+      setView(
+      lng = -68.312,
+      lat = 44.25,
+      #lng = mean(-68.711,-67.953),
+      #lat = mean(44.484, 43.953),
+      zoom = 10
+    )
+    
+  })
   # #Add a tile layer
   observe({
     leafletProxy("WetlandMap") %>%

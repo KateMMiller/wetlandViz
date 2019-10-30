@@ -46,11 +46,12 @@ ui<-shinyUI(
                                  choices = c('Select a species', spplistall)
                                )
                              )),
-            downloadButton("downloadData", "Download")
+            downloadButton("downloadData", "Download Data"),br(),br(),
+            actionButton('reset_view',"Reset Map")
           
             )
         ),
-        column(10, style = "padding: 20px 20px",
+        column(10, style = "padding: 20px 20px", 
                div(leafletOutput("WetlandMap", height = "600px")
                )), br(),
         column(3, style= "padding: 5px 10px", htmlOutput(outputId="Photo_N")),
@@ -95,7 +96,7 @@ ui<-shinyUI(
               label = "Years to plot:",
               multiple = T,
               choices = as.character(unique(welld$year)),
-              selected = 2013:2018)
+              selected = 2013:2019)
           )
         ),
         #end sidebarpanel
