@@ -14,6 +14,9 @@ sentsites<-data.frame(sitename=c("Big Heath", "Duck Pond", "Gilmore Meadow", "He
                                  "Hodgdon Swamp","Little Hunter's Brook","New Mills Meadow","Western Mtn. Swamp"), 
                       well=c('BIGH_WL', 'DUCK_WL','GILM_WL','HEBR_WL','HODG_WL','LIHU_WL','NEMI_WL',
                              'WMTN_WL'))
+
+plotList<- noquote(as.character(levels(sitedata$Label)))
+
 # Pull in veg data
 vmmi<-read.csv('./data/vmmi_2019.csv') #includes 2019 data
 sppdata<-read.csv("./data/Sentinel_and_RAM_species_data_2011-2019.csv")

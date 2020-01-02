@@ -4,6 +4,7 @@ library(dplyr)
 library(leaflet)
 library(shinyjs)
 library(tidyr)
+library(htmltools)
 
 server <- function(input, output) {
   #-----------------------------
@@ -27,7 +28,6 @@ server <- function(input, output) {
         lat2 = 43.5
       )
   })
-  
   
   
   # Plot wetland points on map
@@ -56,6 +56,8 @@ server <- function(input, output) {
                       droplevels()
                      )
            )
+    df <- df %>% group_by(Label) %>% 
+      mutate(plotLabel = ifelse(input$plotLabels, paste(Label), NA)) %>% ungroup()
       return(df)
   })
   
@@ -90,8 +92,8 @@ server <- function(input, output) {
       clearControls() %>%
       addCircleMarkers(
         data = MapData(),
-        #label = ~MapData()$Label,
-        #labelOptions = labelOptions(noHide=TRUE, offset=c(12,-12), textOnly=TRUE),
+        label = ~htmlEscape(MapData()$plotLabel),
+        labelOptions = labelOptions(noHide=TRUE, offset=c(12,-12), textOnly=TRUE),
         radius = 10,
         lng = MapData()$Longitude,
         lat = MapData()$Latitude,
@@ -224,8 +226,18 @@ server <- function(input, output) {
   })
   
 
-  # Make photopoints reactive
-  # Make Attribution
+# Add ability to zoom to given plot
+  center <- reactive({
+  MapData() %>% filter(Label == input$plotZoom) %>% droplevels()
+  })
+  
+  observe({
+    leafletProxy('WetlandMap') %>% 
+      setView(lng =  center()$Longitude, lat = center()$Latitude, zoom = 14) 
+  })
+  
+  
+# Make Attribution
   NPSAttrib <-
     HTML(
       "<a href='https://www.nps.gov/npmap/disclaimer/'>Disclaimer</a> |

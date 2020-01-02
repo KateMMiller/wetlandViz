@@ -22,10 +22,12 @@ ui<-shinyUI(
       fluidRow(
         column(2, style = 'padding: 0 0 0 10px',
           div(id = "MapPanel", h4('Map Controls', class = 'panel-heading'),
+              tags$style(type='text/css', ".selectize-input{font-size: 12px;} 
+                                           .selectize-dropdown{font-size: 12px;}"),
             tags$div(title = 'Choose data type to view',
               selectInput(
                 inputId = 'DataGroup',
-                label = 'Type of data:',
+                label = h5('Type of data:'),
                 choices = c('Veg MMI' = 'vmmi', 
                             'By Site Type' = 'sitetype',
                             'By Species' = 'spplist' 
@@ -46,9 +48,20 @@ ui<-shinyUI(
                                  choices = c('Select a species', spplistall)
                                )
                              )),
-            downloadButton("downloadData", "Download Data"),br(),br(),
-            actionButton('reset_view',"Reset Map")
-          
+            tags$div(title = 'Zoom to a Site',
+                     selectInput(
+                       inputId = 'plotZoom',
+                       label = h5('Zoom to a Site:'),
+                       choices = c('Select a site', plotList  
+                       )
+                     )
+            ),
+            actionButton('reset_view', "Reset Map", class='button'),br(),
+            tags$head(tags$style(".button{font-size: 12px;}")),
+            downloadButton("downloadData", "Download Data", class='button'),br(),
+            checkboxInput(inputId = "plotLabels", 
+                          label= "Show plot label", 
+                          value=FALSE)
             )
         ),
         column(10, style = "padding: 20px 20px", 
