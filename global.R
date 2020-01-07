@@ -47,8 +47,6 @@ sppinv <- sppmap %>%  mutate(inv_num=ifelse(PctFreq>0 & Invasive==TRUE, 1, 0)) %
   select(Label:Site_Type, inv_num) %>% group_by(Label, Longitude, Latitude, Site_Type) %>% 
   summarise(num_inv=sum(inv_num), inv_present=ifelse(num_inv>0,'Present','Absent'))
 
-head(sppinv)
-
 plotlist1<-vmmimap %>% arrange(desc(Site_Type), Label) 
 plotlist<-noquote(as.character(unique(plotlist1$Label)))
 

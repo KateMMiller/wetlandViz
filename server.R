@@ -29,8 +29,6 @@ server <- function(input, output) {
       )
   })
   
-  
-  # Plot wetland points on map
   # Select data to map on plot
   MapData <- reactive({
     df<-switch(input$DataGroup,
@@ -56,22 +54,26 @@ server <- function(input, output) {
                       droplevels()
                      )
            )
-    df <- df %>% group_by(Label) %>% 
-      mutate(plotLabel = ifelse(input$plotLabels, paste(Label), NA)) %>% ungroup()
-      return(df)
   })
   
-  # Set up color palette and filter for colors on map
+
+    # Observe the zoom level of the map to later toggle plot names on/off based on zoom
+  observeEvent(input$WetlandMap_zoom, {
+      })
+  
+    # Set up data, initial map, color palette, and filter for colors on map
   observe({
+    req(input$WetlandMap_zoom)
+    
     if (input$DataGroup == 'vmmi') {
       colorData <- MapData()$VMMI_Rating
       pal <- colorFactor(palette = c('green', 'yellow', 'FireBrick'), 
-                         levels=c('Good','Fair','Poor'))} 
+                        levels=c('Good','Fair','Poor'))} 
     if (input$DataGroup == 'sitetype') {
       colorData <- MapData()$Site_Type
       pal <- colorFactor(palette = c("DodgerBlue","ForestGreen"), domain=c('Sentinel','RAM'))} 
     
-   if (input$DataGroup == 'spplist') {
+    if (input$DataGroup == 'spplist') {
     
       if(input$SppType == 'allspp' & input$Species!='Select a species'){
         colorData <- MapData()$Present
@@ -92,55 +94,66 @@ server <- function(input, output) {
       clearControls() %>%
       addCircleMarkers(
         data = MapData(),
-        label = ~htmlEscape(MapData()$plotLabel),
-        labelOptions = labelOptions(noHide=TRUE, offset=c(12,-12), textOnly=TRUE),
         radius = 10,
         lng = MapData()$Longitude,
         lat = MapData()$Latitude,
         layerId = MapData()$Label,
+        label = if(input$WetlandMap_zoom > 12) MapData()$Label else NULL,
+        labelOptions = labelOptions(noHide=T, textOnly = TRUE, direction = 'bottom', textsize = "12px"),
         fillColor = ~ pal(colorData),
         fillOpacity = 0.75,
         weight = 1.5,
         color = "DimGrey"#, popup=pop
       ) %>%
       addLegend('bottomleft', pal = pal, values = colorData)
+
+    output$Photo_N<-renderText({c('<p> Click on a point in the map to view photopoints </p>')})
+    output$Photo_E<-renderText({c('<p> </p>')})
+    output$Photo_S<-renderText({c('<p> </p>')})
+    output$Photo_W<-renderText({c('<p> </p>')})
     
   })
   
+  # Reset view of map panel
+  observeEvent(input$reset_view, {
+    reset("plotZoom")
+    reset("DataGroup")
+    
+    colorData2 <- MapData()$VMMI_Rating
+    pal2 <- colorFactor(palette = c('green', 'yellow', 'FireBrick'), 
+                       levels=c('Good','Fair','Poor'))
+    
+    leafletProxy("WetlandMap") %>% 
+      clearPopups() %>%
+      clearControls() %>% 
+      clearMarkers() %>% 
+      addCircleMarkers(
+        data = MapData(),
+        radius = 10,
+        lng = MapData()$Longitude,
+        lat = MapData()$Latitude,
+        layerId = MapData()$Label,
+        label = if(input$WetlandMap_zoom > 12) MapData()$Label else NULL,
+        labelOptions = labelOptions(noHide=T, textOnly = TRUE, direction = 'bottom', textsize = "12px"),
+        fillColor = ~ pal2(colorData2),
+        fillOpacity = 0.75,
+        weight = 1.5,
+        color = "DimGrey"#, popup=pop
+      ) %>%
+      addLegend('bottomleft', pal = pal2, values = colorData2) %>% 
+      setView(
+        lng = -68.312,
+        lat = 44.25,
+        zoom = 10
+      ) 
 
-# Add photopoints below MapPanel if plot is clicked on
-  observeEvent(input$WetlandMap_marker_click,{
-    
-    MarkerClick <- input$WetlandMap_marker_click
-    
-    photoN<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
-                            mutate(photoN = paste0(North_View, '.gif')) %>%  
-                            select(photoN) %>% droplevels())
-
-    output$Photo_N <- renderText({c('<img src="',photoN,'" height="250"/>')})
-    
-    
-    photoE<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
-                            mutate(photoE = paste0(East_View, '.gif')) %>%  
-                            select(photoE) %>% droplevels())
-    
-    output$Photo_E <- renderText({c('<img src="',photoE,'" height="250"/>')})
-    
-    photoS<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
-                            mutate(photoS = paste0(South_View, '.gif')) %>%  
-                            select(photoS) %>% droplevels())
-    
-    output$Photo_S <- renderText({c('<img src="',photoS,'" height="250"/>')})
-    
-    photoW<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
-                            mutate(photoW = paste0(West_View, '.gif')) %>%  
-                            select(photoW) %>% droplevels())
-    
-    output$Photo_W <- renderText({c('<img src="',photoW,'" height="250"/>')})
-    })
-
-
-# Set up popups for vmmi ratings or species list
+    output$Photo_N<-renderText({c('<p> Click on a point in the map to view photopoints </p>')})
+    output$Photo_E<-renderText({c('<p> </p>')})
+    output$Photo_S<-renderText({c('<p> </p>')})
+    output$Photo_W<-renderText({c('<p> </p>')})
+  })
+  
+  # Set up popups for vmmi ratings or species list
   observeEvent(input$WetlandMap_marker_click, {
     MarkerClick <- input$WetlandMap_marker_click
     site <- MapData()[MapData()$Label == MarkerClick$id, ]
@@ -217,27 +230,58 @@ server <- function(input, output) {
     leafletProxy("WetlandMap") %>%
       clearPopups() %>%
       addPopups(
-        map = .,
         lat = site$Latitude,
         lng = site$Longitude,
         layerId = "MarkerClickPopup",
         popup = content
       ) 
+    
+    photoN<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
+                            mutate(photoN = paste0(North_View, '.gif')) %>%  
+                            select(photoN) %>% droplevels())
+    
+    output$Photo_N <- renderText({c('<img src="',photoN,'" height="250"/>')})
+    
+    
+    photoE<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
+                            mutate(photoE = paste0(East_View, '.gif')) %>%  
+                            select(photoE) %>% droplevels())
+    
+    output$Photo_E <- renderText({c('<img src="',photoE,'" height="250"/>')})
+    
+    photoS<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
+                            mutate(photoS = paste0(South_View, '.gif')) %>%  
+                            select(photoS) %>% droplevels())
+    
+    output$Photo_S <- renderText({c('<img src="',photoS,'" height="250"/>')})
+    
+    photoW<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
+                            mutate(photoW = paste0(West_View, '.gif')) %>%  
+                            select(photoW) %>% droplevels())
+    
+    output$Photo_W <- renderText({c('<img src="',photoW,'" height="250"/>')})
   })
-  
 
-# Add ability to zoom to given plot
-  center <- reactive({
-  MapData() %>% filter(Label == input$plotZoom) %>% droplevels()
-  })
-  
-  observe({
+  # Set up ability to zoom to given plot
+  observeEvent(input$plotZoom, {
+    req(input$plotZoom)
+    
+    plot_selected <- MapData() %>% filter(Label == input$plotZoom) %>%  droplevels()
+    
     leafletProxy('WetlandMap') %>% 
-      setView(lng =  center()$Longitude, lat = center()$Latitude, zoom = 14) 
+      setView(lng =  plot_selected$Longitude, lat = plot_selected$Latitude, zoom = 16) %>% 
+      addCircleMarkers(data = plot_selected,
+                       lng = plot_selected$Longitude, 
+                       lat = plot_selected$Latitude, 
+                       layerId = plot_selected$id[1],
+                       color = 'Aqua',
+                       radius = 12,
+                       options = list(zIndex=1000),
+                       stroke = 12
+                       ) 
   })
   
-  
-# Make Attribution
+  # Make NPS map Attribution
   NPSAttrib <-
     HTML(
       "<a href='https://www.nps.gov/npmap/disclaimer/'>Disclaimer</a> |
@@ -248,21 +292,8 @@ server <- function(input, output) {
       target='_blank'>Improve Park Tiles</a>"
     )
   
-  # Reset view of map panel
-  observe({
-    input$reset_view
-    leafletProxy("WetlandMap") %>% 
-      clearPopups() %>% 
-      setView(
-      lng = -68.312,
-      lat = 44.25,
-      #lng = mean(-68.711,-67.953),
-      #lat = mean(44.484, 43.953),
-      zoom = 10
-    )
-    
-  })
-  # #Add a tile layer
+
+  # #Add a tile layers
   observe({
     leafletProxy("WetlandMap") %>%
       clearTiles() %>%
@@ -292,7 +323,7 @@ server <- function(input, output) {
   }) 
   
   
-  
+  # Download data button
   output$downloadData <- downloadHandler(
     filename = function() {
       paste(input$DataGroup, ".csv", sep="")

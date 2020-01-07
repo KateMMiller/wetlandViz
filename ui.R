@@ -25,7 +25,7 @@ ui<-shinyUI(
               tags$style(type='text/css', ".selectize-input{font-size: 12px;} 
                                            .selectize-dropdown{font-size: 12px;}"),
             tags$div(title = 'Choose data type to view',
-              selectInput(
+              selectizeInput(
                 inputId = 'DataGroup',
                 label = h5('Type of data:'),
                 choices = c('Veg MMI' = 'vmmi', 
@@ -42,14 +42,14 @@ ui<-shinyUI(
                              ),
             conditionalPanel(condition = "input.DataGroup=='spplist' & input.SppType=='allspp'",
                              tags$div(title = "Select a species",
-                               selectInput(
+                               selectizeInput(
                                  inputId = "Species",
                                  label = 'Select a species:',
                                  choices = c('Select a species', spplistall)
                                )
                              )),
             tags$div(title = 'Zoom to a Site',
-                     selectInput(
+                     selectizeInput(
                        inputId = 'plotZoom',
                        label = h5('Zoom to a Site:'),
                        choices = c('Select a site', plotList  
@@ -58,10 +58,7 @@ ui<-shinyUI(
             ),
             actionButton('reset_view', "Reset Map", class='button'),br(),
             tags$head(tags$style(".button{font-size: 12px;}")),
-            downloadButton("downloadData", "Download Data", class='button'),br(),
-            checkboxInput(inputId = "plotLabels", 
-                          label= "Show plot label", 
-                          value=FALSE)
+            downloadButton("downloadData", "Download Data", class='button'),br()
             )
         ),
         column(10, style = "padding: 20px 20px", 
