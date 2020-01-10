@@ -10,10 +10,27 @@ server <- function(input, output) {
   #-----------------------------
   # Wetland Map Controls
   #-----------------------------
+
+  # Make NPS map Attribution
+  NPSAttrib <-
+    HTML(
+      "<a href='https://www.nps.gov/npmap/disclaimer/'>Disclaimer</a> |
+      &copy; <a href='http://mapbox.com/about/maps' target='_blank'>Mapbox</a>
+      &copy; <a href='http://openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a> contributors |
+      <a class='improve-park-tiles'
+      href='http://insidemaps.nps.gov/places/editor/#background=mapbox-satellite&map=4/-95.97656/39.02772&overlays=park-tiles-overlay'
+      target='_blank'>Improve Park Tiles</a>"
+    )
   
   # Render wetland map
   output$WetlandMap <- renderLeaflet({
     leaflet() %>%
+      addTiles(
+        group = "Map",
+        urlTemplate = "//{s}.tiles.mapbox.com/v4/nps.2yxv8n84,nps.jhd2e8lb/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibnBzIiwiYSI6IkdfeS1OY1UifQ.K8Qn5ojTw4RV1GwBlsci-Q",
+        attribution = NPSAttrib,
+        options = tileOptions(minZoom = 8)
+      ) %>% 
       setView(
         lng = -68.312,
         lat = 44.25,
@@ -26,8 +43,37 @@ server <- function(input, output) {
         lng2 = -67.5,
         lat1 = 44.9,
         lat2 = 43.5
-      )
+      ) 
   })
+  
+  # #Add a tile layers
+  observe({
+    leafletProxy("WetlandMap") %>%
+      addTiles(
+        group = "Map",
+        urlTemplate = "//{s}.tiles.mapbox.com/v4/nps.2yxv8n84,nps.jhd2e8lb/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibnBzIiwiYSI6IkdfeS1OY1UifQ.K8Qn5ojTw4RV1GwBlsci-Q",
+        attribution = NPSAttrib,
+        options = tileOptions(minZoom = 8)
+      ) %>%
+      addTiles(
+        group = "Imagery",
+        urlTemplate = "//{s}.tiles.mapbox.com/v4/nps.2c589204,nps.25abf75b,nps.7531d30a/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibnBzIiwiYSI6IkdfeS1OY1UifQ.K8Qn5ojTw4RV1GwBlsci-Q",
+        attribution = NPSAttrib,
+        options = tileOptions(minZoom = 8)
+      ) %>%
+      addTiles(
+        group = "Slate",
+        urlTemplate = "//{s}.tiles.mapbox.com/v4/nps.68926899,nps.502a840b/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibnBzIiwiYSI6IkdfeS1OY1UifQ.K8Qn5ojTw4RV1GwBlsci-Q",
+        attribution = NPSAttrib,
+        options = tileOptions(minZoom = 8)
+      ) %>%
+      addLayersControl(
+        map = ., 
+        #        baseGroups = c("Map", "Imagery", "Slate", "OpenStreetMap")
+        baseGroups = c("Map", "Imagery", "Slate"),
+        options = layersControlOptions(collapsed = T)
+      )
+  }) 
   
   # Select data to map on plot
   MapData <- reactive({
@@ -89,7 +135,6 @@ server <- function(input, output) {
       }
     
     leafletProxy("WetlandMap") %>%
-      clearShapes() %>%
       clearPopups() %>% 
       clearControls() %>%
       addCircleMarkers(
@@ -116,6 +161,7 @@ server <- function(input, output) {
   
   # Reset view of map panel
   observeEvent(input$reset_view, {
+    input$DataGroup
     reset("plotZoom")
     reset("DataGroup")
     
@@ -127,6 +173,7 @@ server <- function(input, output) {
       clearPopups() %>%
       clearControls() %>% 
       clearMarkers() %>% 
+      clearShapes() %>% 
       addCircleMarkers(
         data = MapData(),
         radius = 10,
@@ -157,6 +204,7 @@ server <- function(input, output) {
   observeEvent(input$WetlandMap_marker_click, {
     MarkerClick <- input$WetlandMap_marker_click
     site <- MapData()[MapData()$Label == MarkerClick$id, ]
+    #reset("plotZoom")
     
     tempdata <- 
         if (input$DataGroup == 'vmmi') {
@@ -217,7 +265,7 @@ server <- function(input, output) {
                                                 filter(species!= 'No invasives') %>% 
                                                 droplevels() %>% select(species) %>% unlist(), 
                                              collapse=", ")}
-          ) # STILL ONLY SHOWS FIRST INVASIVE SPECIES PRESENT
+          ) 
           )
           )
              }  
@@ -225,16 +273,6 @@ server <- function(input, output) {
         }
 
       ) # end of paste0
-    
-    
-    leafletProxy("WetlandMap") %>%
-      clearPopups() %>%
-      addPopups(
-        lat = site$Latitude,
-        lng = site$Longitude,
-        layerId = "MarkerClickPopup",
-        popup = content
-      ) 
     
     photoN<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
                             mutate(photoN = paste0(North_View, '.gif')) %>%  
@@ -260,8 +298,17 @@ server <- function(input, output) {
                             select(photoW) %>% droplevels())
     
     output$Photo_W <- renderText({c('<img src="',photoW,'" height="250"/>')})
+    
+    leafletProxy("WetlandMap") %>%
+      clearPopups() %>%
+      addPopups(
+        lat = site$Latitude,
+        lng = site$Longitude,
+        #layerId = "MarkerClickPopup",
+        popup = content
+      ) 
   })
-
+  
   # Set up ability to zoom to given plot
   observeEvent(input$plotZoom, {
     req(input$plotZoom)
@@ -269,60 +316,11 @@ server <- function(input, output) {
     plot_selected <- MapData() %>% filter(Label == input$plotZoom) %>%  droplevels()
     
     leafletProxy('WetlandMap') %>% 
-      setView(lng =  plot_selected$Longitude, lat = plot_selected$Latitude, zoom = 16) %>% 
-      addCircleMarkers(data = plot_selected,
-                       lng = plot_selected$Longitude, 
-                       lat = plot_selected$Latitude, 
-                       layerId = plot_selected$id[1],
-                       color = 'Aqua',
-                       radius = 12,
-                       options = list(zIndex=1000),
-                       stroke = 12
-                       ) 
+      clearControls() %>%
+      clearPopups() %>% 
+      setView(lng =  plot_selected$Longitude, lat = plot_selected$Latitude, zoom = 16) 
   })
-  
-  # Make NPS map Attribution
-  NPSAttrib <-
-    HTML(
-      "<a href='https://www.nps.gov/npmap/disclaimer/'>Disclaimer</a> |
-      &copy; <a href='http://mapbox.com/about/maps' target='_blank'>Mapbox</a>
-      &copy; <a href='http://openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a> contributors |
-      <a class='improve-park-tiles'
-      href='http://insidemaps.nps.gov/places/editor/#background=mapbox-satellite&map=4/-95.97656/39.02772&overlays=park-tiles-overlay'
-      target='_blank'>Improve Park Tiles</a>"
-    )
-  
 
-  # #Add a tile layers
-  observe({
-    leafletProxy("WetlandMap") %>%
-      clearTiles() %>%
-      addTiles(
-        group = "Map",
-        urlTemplate = "//{s}.tiles.mapbox.com/v4/nps.2yxv8n84,nps.jhd2e8lb/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibnBzIiwiYSI6IkdfeS1OY1UifQ.K8Qn5ojTw4RV1GwBlsci-Q",
-        attribution = NPSAttrib,
-        options = tileOptions(minZoom = 8)
-      ) %>%
-      addTiles(
-        group = "Imagery",
-        urlTemplate = "//{s}.tiles.mapbox.com/v4/nps.2c589204,nps.25abf75b,nps.7531d30a/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibnBzIiwiYSI6IkdfeS1OY1UifQ.K8Qn5ojTw4RV1GwBlsci-Q",
-        attribution = NPSAttrib,
-        options = tileOptions(minZoom = 8)
-      ) %>%
-      addTiles(
-        group = "Slate",
-        urlTemplate = "//{s}.tiles.mapbox.com/v4/nps.68926899,nps.502a840b/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibnBzIiwiYSI6IkdfeS1OY1UifQ.K8Qn5ojTw4RV1GwBlsci-Q",
-        attribution = NPSAttrib,
-        options = tileOptions(minZoom = 8)
-      ) %>%
-      addLayersControl(
-        map = .,
-        baseGroups = c("Map", "Imagery", "Slate"),
-        options = layersControlOptions(collapsed = T)
-      )
-  }) 
-  
-  
   # Download data button
   output$downloadData <- downloadHandler(
     filename = function() {
@@ -332,7 +330,7 @@ server <- function(input, output) {
       write.csv(MapData(), file, row.names=F)
     }
   )
-  
+
   # End of controls for Wetland Map
   
   #-------------------------------
