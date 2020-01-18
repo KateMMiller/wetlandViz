@@ -11,17 +11,6 @@ server <- function(input, output) {
   # Wetland Map Controls
   #-----------------------------
 
-  # Make NPS map Attribution
-  NPSAttrib <-
-    HTML(
-      "<a href='https://www.nps.gov/npmap/disclaimer/'>Disclaimer</a> |
-      &copy; <a href='http://mapbox.com/about/maps' target='_blank'>Mapbox</a>
-      &copy; <a href='http://openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a> contributors |
-      <a class='improve-park-tiles'
-      href='http://insidemaps.nps.gov/places/editor/#background=mapbox-satellite&map=4/-95.97656/39.02772&overlays=park-tiles-overlay'
-      target='_blank'>Improve Park Tiles</a>"
-    )
-  
   # Render wetland map
   output$WetlandMap <- renderLeaflet({
     leaflet() %>%
@@ -46,7 +35,18 @@ server <- function(input, output) {
       ) 
   })
   
-  # #Add a tile layers
+  # Make NPS map Attribution
+  NPSAttrib <-
+    HTML(
+      "<a href='https://www.nps.gov/npmap/disclaimer/'>Disclaimer</a> |
+      &copy; <a href='http://mapbox.com/about/maps' target='_blank'>Mapbox</a>
+      &copy; <a href='http://openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a> contributors |
+      <a class='improve-park-tiles'
+      href='http://insidemaps.nps.gov/places/editor/#background=mapbox-satellite&map=4/-95.97656/39.02772&overlays=park-tiles-overlay'
+      target='_blank'>Improve Park Tiles</a>"
+    )
+  
+  # Add a tile layers
   observe({
     leafletProxy("WetlandMap") %>%
       addTiles(
@@ -102,7 +102,50 @@ server <- function(input, output) {
            )
   })
   
-
+  # Create reactive palette
+  pal <- reactive({
+    if (input$DataGroup == 'vmmi') {
+      pal <- colorFactor(palette = c('green', 'yellow', 'FireBrick'), 
+                         levels=c('Good','Fair','Poor'))} 
+    if (input$DataGroup == 'sitetype') {
+      pal <- colorFactor(palette = c("DodgerBlue","ForestGreen"), domain=c('Sentinel','RAM'))} 
+    
+    if (input$DataGroup == 'spplist') {
+      
+      if(input$SppType == 'allspp' & input$Species!='Select a species'){
+        pal <- colorFactor(palette = c("DimGrey","green"), domain=c('Absent','Present'))}
+      
+      if(input$SppType == 'allspp' & input$Species=='Select a species'){
+        pal <- colorFactor(palette = c("DodgerBlue","ForestGreen"), domain=c('Sentinel','RAM'))}    
+      
+      if(input$SppType == 'invspp'){
+        pal <- colorFactor(palette=c('DimGrey','green'), levels=c('Absent','Present'))}
+    }
+    return(pal)
+  })
+  
+  # Create reactive ColorData 
+  colorData <- reactive({
+    if (input$DataGroup == 'vmmi') {
+      colorData <- MapData()$VMMI_Rating}
+    
+    if (input$DataGroup == 'sitetype') {
+      colorData <- MapData()$Site_Type} 
+    
+    if (input$DataGroup == 'spplist') {
+      
+      if(input$SppType == 'allspp' & input$Species!='Select a species'){
+        colorData <- MapData()$Present}
+      
+      if(input$SppType == 'allspp' & input$Species=='Select a species'){
+        colorData <- MapData()$Site_Type}
+      
+      if(input$SppType == 'invspp'){
+        colorData <- MapData()$inv_present}
+    }
+    return(colorData)
+  })
+  
     # Observe the zoom level of the map to later toggle plot names on/off based on zoom
   observeEvent(input$WetlandMap_zoom, {
       })
@@ -110,29 +153,6 @@ server <- function(input, output) {
     # Set up data, initial map, color palette, and filter for colors on map
   observe({
     req(input$WetlandMap_zoom)
-    
-    if (input$DataGroup == 'vmmi') {
-      colorData <- MapData()$VMMI_Rating
-      pal <- colorFactor(palette = c('green', 'yellow', 'FireBrick'), 
-                        levels=c('Good','Fair','Poor'))} 
-    if (input$DataGroup == 'sitetype') {
-      colorData <- MapData()$Site_Type
-      pal <- colorFactor(palette = c("DodgerBlue","ForestGreen"), domain=c('Sentinel','RAM'))} 
-    
-    if (input$DataGroup == 'spplist') {
-    
-      if(input$SppType == 'allspp' & input$Species!='Select a species'){
-        colorData <- MapData()$Present
-        pal <- colorFactor(palette = c("DimGrey","green"), domain=c('Absent','Present'))}
-
-      if(input$SppType == 'allspp' & input$Species=='Select a species'){
-        colorData <- MapData()$Site_Type
-        pal <- colorFactor(palette = c("DodgerBlue","ForestGreen"), domain=c('Sentinel','RAM'))}    
-        
-      if(input$SppType == 'invspp'){
-        colorData <- MapData()$inv_present
-        pal <- colorFactor(palette=c('DimGrey','green'), levels=c('Absent','Present'))}
-      }
     
     leafletProxy("WetlandMap") %>%
       clearPopups() %>% 
@@ -145,12 +165,12 @@ server <- function(input, output) {
         layerId = MapData()$Label,
         label = if(input$WetlandMap_zoom > 12) MapData()$Label else NULL,
         labelOptions = labelOptions(noHide=T, textOnly = TRUE, direction = 'bottom', textsize = "12px"),
-        fillColor = ~ pal(colorData),
+        fillColor = pal()(colorData()),
         fillOpacity = 0.75,
         weight = 1.5,
         color = "DimGrey"#, popup=pop
       ) %>%
-      addLegend('bottomleft', pal = pal, values = colorData)
+      addLegend('bottomleft', pal = pal(), values = colorData())
 
     output$Photo_N<-renderText({c('<p> Click on a point in the map to view photopoints </p>')})
     output$Photo_E<-renderText({c('<p> </p>')})
@@ -165,29 +185,9 @@ server <- function(input, output) {
     reset("plotZoom")
     reset("DataGroup")
     
-    colorData2 <- MapData()$VMMI_Rating
-    pal2 <- colorFactor(palette = c('green', 'yellow', 'FireBrick'), 
-                       levels=c('Good','Fair','Poor'))
-    
     leafletProxy("WetlandMap") %>% 
       clearPopups() %>%
       clearControls() %>% 
-      clearMarkers() %>% 
-      clearShapes() %>% 
-      addCircleMarkers(
-        data = MapData(),
-        radius = 10,
-        lng = MapData()$Longitude,
-        lat = MapData()$Latitude,
-        layerId = MapData()$Label,
-        label = if(input$WetlandMap_zoom > 12) MapData()$Label else NULL,
-        labelOptions = labelOptions(noHide=T, textOnly = TRUE, direction = 'bottom', textsize = "12px"),
-        fillColor = ~ pal2(colorData2),
-        fillOpacity = 0.75,
-        weight = 1.5,
-        color = "DimGrey"#, popup=pop
-      ) %>%
-      addLegend('bottomleft', pal = pal2, values = colorData2) %>% 
       setView(
         lng = -68.312,
         lat = 44.25,
@@ -204,8 +204,7 @@ server <- function(input, output) {
   observeEvent(input$WetlandMap_marker_click, {
     MarkerClick <- input$WetlandMap_marker_click
     site <- MapData()[MapData()$Label == MarkerClick$id, ]
-    #reset("plotZoom")
-    
+
     tempdata <- 
         if (input$DataGroup == 'vmmi') {
            vmmimap %>% filter(Label == MarkerClick$id) %>% 
@@ -223,9 +222,7 @@ server <- function(input, output) {
 
     content <-
       paste0("<b>", h4("Site: ",if(site$Site_Type == 'Sentinel'){paste0(site$Label, " (Sentinel)")
-          } else { if(site$Site_Type == 'RAM'){
-          paste0(site$Label)}}
-      ), "</b>",
+          } else { if(site$Site_Type == 'RAM'){paste0(site$Label)}}), "</b>",
       if (input$DataGroup == 'vmmi') {
         tagList(tags$table(
           class = 'table',
@@ -304,7 +301,6 @@ server <- function(input, output) {
       addPopups(
         lat = site$Latitude,
         lng = site$Longitude,
-        #layerId = "MarkerClickPopup",
         popup = content
       ) 
   })
