@@ -64,7 +64,7 @@ ui<-shinyUI(
             downloadButton("downloadData", "Download Data", class='button'),br()
             )
         ),
-        column(10, style = "padding: 20px 20px", 
+        column(10, style = "padding: 20px 40px", 
                div(leafletOutput("WetlandMap", height = "600px")
                )), br(),
         column(3, style= "padding: 5px 10px", htmlOutput(outputId="Photo_N")),

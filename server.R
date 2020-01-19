@@ -5,6 +5,7 @@ library(leaflet)
 library(shinyjs)
 library(tidyr)
 library(htmltools)
+library(leaflet.extras)
 
 server <- function(input, output) {
   #-----------------------------
@@ -146,11 +147,11 @@ server <- function(input, output) {
     return(colorData)
   })
   
-    # Observe the zoom level of the map to later toggle plot names on/off based on zoom
+  # Observe the zoom level of the map to later toggle plot names on/off based on zoom
   observeEvent(input$WetlandMap_zoom, {
       })
   
-    # Set up data, initial map, color palette, and filter for colors on map
+  # Set up data, initial map, color palette, and filter for colors on map
   observe({
     req(input$WetlandMap_zoom)
     
@@ -311,11 +312,33 @@ server <- function(input, output) {
     
     plot_selected <- MapData() %>% filter(Label == input$plotZoom) %>%  droplevels()
     
+    output$Photo_N<-renderText({c('<p> Click on a point in the map to view photopoints </p>')})
+    output$Photo_E<-renderText({c('<p> </p>')})
+    output$Photo_S<-renderText({c('<p> </p>')})
+    output$Photo_W<-renderText({c('<p> </p>')})
+    
     leafletProxy('WetlandMap') %>% 
       clearControls() %>%
       clearPopups() %>% 
-      setView(lng =  plot_selected$Longitude, lat = plot_selected$Latitude, zoom = 16) 
+      setView(
+        lng =  plot_selected$Longitude, 
+        lat = plot_selected$Latitude, 
+        zoom = 16) 
+    delay(400, leafletProxy("WetlandMap") %>% 
+      addCircles(
+        lng = plot_selected$Longitude,
+        lat = plot_selected$Latitude,
+        layerId = plot_selected$Label,
+        group = 'pulse',
+        radius = 19,
+        color = '#00ffff',
+        fillOpacity = 0,
+        weight = 5)) 
+    delay(1000, 
+    leafletProxy('WetlandMap') %>% 
+      clearShapes())
   })
+  
 
   # Download data button
   output$downloadData <- downloadHandler(
