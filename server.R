@@ -5,7 +5,9 @@ library(leaflet)
 library(shinyjs)
 library(tidyr)
 library(htmltools)
-library(leaflet.extras)
+library(DT)
+library(ggplot2)
+#library(leaflet.extras)
 
 server <- function(input, output) {
   #-----------------------------
@@ -356,26 +358,136 @@ server <- function(input, output) {
   # Hydrograph Plot Controls
   #-------------------------------
   # Render hydroplot
-  output$hydroPlot <- renderPlot({
+  plotInput <- reactive({
     plot_hydro_site_year(
       df = welld,
       yvar = input$SentSite,
       years = input$Years,
       site = as.character(sentsites$sitename[sentsites$well ==
-                                               input$SentSite])
-    )
-  }) # End Hydrograph renderPlot
+                                               input$SentSite]))
+      })
+
+  output$hydroPlot <- renderPlot({
+    print(plotInput())
+  })  
+
+  # Download hydrograph button
+  output$downloadHydroPlot <- downloadHandler(
+    filename = function() {
+      paste0(sub(" ", "_", as.character(sentsites$sitename[sentsites$well ==
+                                               input$SentSite])), "_",
+             ifelse(length(input$Years)>1, paste0(range(input$Years)[1], "-", range(input$Years)[2]),
+                    paste0(input$Years[1])), ".jpeg")
+    }, 
+    content = function(file){
+      ggsave(file, plot = plotInput(), width = 14, height = 10, device = 'jpeg')
+    }
+  )
   
+  # Reactive hydro stats dataset for hydroTable
+  
+  hydroData <- reactive({
+     df <- well_stats %>% 
+       filter(site == input$SentSite, 
+              year %in% input$Years, 
+              metricLab == input$metric) %>% 
+       mutate(value = round(value, 2)) %>% 
+       droplevels() 
+     return(df)
+  })
+  
+  # Reactive title for hydroTable
+  output$tableTitle <- renderText({
+    paste0("Table: ",unique(hydroData()$metricLab), 
+           " for ",
+           unique(hydroData()$Label))
+  })
+    
+  # JS code to overwrite default DT to plot a top border
+  headerCallback <- c(
+    "function(thead, data, start, end, display){",
+    "  $('th', thead).css('border-top', '2px solid black');",
+    "}"
+  )
+  
+  # Render hydro stats table
+  output$hydroTable<-renderDT(
+    hydroData()[,c("year","value")],
+    #caption = paste0(unique(hydroData()$metricLab), 
+    #                 " for ", unique(hydroData()$Label)),
+    class = "display nowrap compact",
+    rownames = FALSE,
+    options = list(
+      headerCallback = JS(headerCallback),
+      columns = list(
+        list(title = 'Year'),
+        list(title = 'Value')
+      ),
+      columnDefs = list(list(className = 'dt-center', targets="_all")),
+      autoWidth = FALSE,
+      columnDefs = list(list(targets=c(0), visible=TRUE, width='30%'),
+                   list(targets=c(1), visible=TRUE, width='60%')),
+      searching = FALSE,
+      dom = 't',
+      scrollX = TRUE)) 
+  
+  # Download hydro data button
+  output$downloadHydroData <- downloadHandler(
+    filename = function() {
+      paste("well_stats", ".csv", sep="")
+    },
+    content = function(file){
+      write.csv(well_stats, file, row.names=F)
+    }
+  )
+  
+
   #-------------------------------
   # Species List Tab Controls
   #-------------------------------
+  # Make reactive spp list
   spptable<-reactive({
-     spplisttbl<- sppmap %>% filter(Label==input$WetlandSite) %>% select(Latin_Name, Common, Invasive) %>% droplevels()
+     spplisttbl<- sppmap %>% filter(Label==input$WetlandSite) %>% 
+       mutate(Invasive = ifelse(Invasive==FALSE,paste("No"), paste("Yes"))) %>% 
+       select(Latin_Name, Common, Invasive) %>% droplevels()
      return(spplisttbl)
   })
   
-  output$SpeciesList <- renderTable({
-    spptable()
-  }, width='80%') # End of Species List Tab
+  # render data table
+  output$SpeciesList <- renderDT(
+    spptable(),
+    class = "display nowrap compact",
+    rownames = FALSE,
+    options = list(
+      headerCallback = JS(headerCallback),
+      columns = list(
+        list(title = 'Latin Name'),
+        list(title = 'Common Name'),
+        list(title = "Invasive?")),
+      columnDefs = list(list(className = 'dt-center', targets="_all")),
+      autoWidth = FALSE,
+      columnDefs = list(list(targets=c(0), visible=TRUE, width='50%'),
+                        list(targets=c(1), visible=TRUE, width='35%'),
+                        list(targets=c(2), visible=TRUE, width='15%')),
+      searching = FALSE,
+      dom = 't',
+      scroller = TRUE, 
+      scrollX = T, 
+      pageLength = 150) # Number of elements to allow on one page 
+  
+  )
+  
+  # download button for site-level species list
+  # Download hydro data button
+  output$downloadSpeciesData <- downloadHandler(
+    filename = function() {
+      paste0(sub(" ", "_", input$WetlandSite), "_",
+       "species_list", ".csv", sep="")
+    },
+    content = function(file){
+      write.csv(spptable(), file, row.names=F)
+    }
+  )
+  
   
 }

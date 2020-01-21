@@ -1,5 +1,6 @@
 library(shiny)
 library(leaflet)
+library(DT)
 
 ui<-shinyUI(
   navbarPage(
@@ -8,6 +9,7 @@ ui<-shinyUI(
       alt='Forest Visualizer'> </a> NETN Wetland Data Visualizer</div>"
     ),
     position = "static-top", inverse = TRUE, collapsible = FALSE, fluid = TRUE,
+    theme="https://www.nps.gov/lib/bootstrap/3.3.2/css/nps-bootstrap.min.css",
     windowTitle = "NETN Wetland Data Visualizer", id = "MainNavBar",
     
     #--------------------------------------------------------------
@@ -18,13 +20,14 @@ ui<-shinyUI(
       useShinyjs(),
       div(class = 'outer', 
           tags$head(includeCSS("./www/mapstyles.css")),
-         # tags$head(includeScript("https://www.nps.gov/common/commonspot/templates/js/federated-analytics.js")),
+          tags$head(includeScript("https://www.nps.gov/common/commonspot/templates/js/federated-analytics.js"))#,
           #tags$head(includeCSS("https://www.nps.gov/lib/npmap.js/4.0.0/npmap.min.css")),
-          tags$head(includeScript("https://www.nps.gov/lib/npmap.js/4.0.0/npmap-bootstrap.min.js"))
+          #tags$head(includeScript("https://www.nps.gov/lib/npmap.js/4.0.0/npmap-bootstrap.min.js"))
           ),
       fluidRow(
         column(2, style = 'padding: 0 0 0 10px',
-          div(id = "MapPanel", h4('Map Controls', class = 'panel-heading'),
+          div(id = "MapPanel", class="panel panel-default controls",
+              h4('Map Controls', class = 'panel-heading'),
               tags$style(type='text/css', ".selectize-input{font-size: 12px;} 
                                            .selectize-dropdown{font-size: 12px;}"),
             tags$div(title = 'Choose data type to view',
@@ -44,6 +47,8 @@ ui<-shinyUI(
                              )
                              ),
             conditionalPanel(condition = "input.DataGroup=='spplist' & input.SppType=='allspp'",
+                             tags$style(type='text/css', ".selectize-input {font-size: 14px;} 
+                                        .selectize-dropdown {font-size: 14px;}"),
                              tags$div(title = "Select a species",
                                selectizeInput(
                                  inputId = "Species",
@@ -51,6 +56,8 @@ ui<-shinyUI(
                                  choices = c('Select a species', spplistall)
                                )
                              )),
+            tags$style(type='text/css', ".selectize-input { font-size: 14px;} 
+                       .selectize-dropdown { font-size: 14px; }"),
             tags$div(title = 'Zoom to a Site',
                      selectizeInput(
                        inputId = 'plotZoom',
@@ -59,20 +66,19 @@ ui<-shinyUI(
                        )
                      )
             ),
-            actionButton('reset_view', "Reset Map", class='button'),br(),
+            actionButton('reset_view', "Reset Map", class='btn btn-primary'),br(),
             tags$head(tags$style(".button{font-size: 12px;}")),
-            downloadButton("downloadData", "Download Data", class='button'),br()
+            downloadButton("downloadData", "Download Data", class="btn btn-primary"),br()
             )
         ),
         column(10, style = "padding: 20px 40px", 
                div(leafletOutput("WetlandMap", height = "600px")
                )), br(),
-        column(3, style= "padding: 5px 10px", htmlOutput(outputId="Photo_N")),
+        
+        h5(column(3, style= "padding: 5px 10px", htmlOutput(outputId="Photo_N"))),
         column(3, style= "padding: 5px 10px", htmlOutput(outputId="Photo_E")),
         column(3, style= "padding: 5px 10px", htmlOutput(outputId="Photo_S")),
         column(3, style= "padding: 5px 10px", htmlOutput(outputId="Photo_W"))
-        
-      
         ) # end fluidRow
     ),#end tabPanel
     
@@ -87,11 +93,13 @@ ui<-shinyUI(
       
       fluidRow(
         column(2, style = "padding: 0 0 0 10px",
-          div(id = "HydrographControlPanel", class = "panel-heading"),
-          tags$div(title = 'Choose the site to plot',
+          div(id = "HydrographControlPanel", class="panel panel-default controls",
+              h4("Hydrograph Controls", class='panel-heading'),
+          tags$style(type='text/css', ".selectize-input { font-size: 14px;} .selectize-dropdown { font-size: 14px; }"),
+            tags$div(title = 'Choose the site to plot'),
             selectizeInput(
               inputId = "SentSite",
-              label = "Sentinel Site:",
+              label = h4("Sentinel Site:"),
               choices = c(
                 "Big Heath" = 'BIGH_WL',
                 "Duck Pond" = "DUCK_WL",
@@ -103,14 +111,28 @@ ui<-shinyUI(
                 "Western Mtn. Swamp" = "WMTN_WL"
               ),selected = NULL)
           ),
+          tags$style(type='text/css', ".selectize-input { font-size: 14px;} 
+                     .selectize-dropdown { font-size: 14px; }"),
           tags$div(title = 'Choose years to plot',
             selectizeInput(
               inputId = "Years",
-              label = "Years to plot:",
+              label = h4("Years to plot:"),
               multiple = T,
               choices = as.character(unique(welld$year)),
               selected = 2013:2019)
-          )
+          ),
+          downloadButton("downloadHydroPlot", "Download Hydrograph", class="btn btn-primary"),
+          tags$div(title = 'Growing season summary',
+                   tags$hr(style="border-color: black;"),
+                   h4('Growing Season Statistics:'),
+              selectizeInput(inputId = "metric",
+                             label = span("Select a statistic", style = "font-size:15px"),
+                             choices = unique(well_stats$metricLab),
+                             selected = "Mean Water Level (cm)"),
+              h5(textOutput('tableTitle')),
+              span(dataTableOutput('hydroTable'), style = "font-size:15px")),
+          br(),
+          downloadButton("downloadHydroData", "Download Water Level Stats", class="btn btn-primary")
         ),
         #end sidebarpanel
        # mainPanel(
@@ -127,23 +149,26 @@ ui<-shinyUI(
     #--------------------------------------------------------------
     tabPanel(
       h4("Species Lists", align = 'center'), style = "padding: 0",
-      useShinyjs(),
-      div(class = "outer", tags$head(HTML('<link rel="icon", href="ah_small_black.gif", type="image/gif" />'))),
+      #useShinyjs(),
+      #div(class = "outer", tags$head(HTML('<link rel="icon", href="ah_small_black.gif", type="image/gif" />'))),
       
       fluidRow(
-        column(3, style = "padding: 0 0 0 20px",
-               div(id = "AppListControlPanel", class = "panel-heading"),
-               tags$div(title = 'Choose the site to plot',
+        column(2, style = "padding: 0 0 0 20px",
+               div(id = "SppListControlPanel", class="panel panel-default controls",
+                   h4("Species Lists", class='panel-heading'),
+               
+               tags$div(title = 'Choose the site for species list', class="panel panel-default controls",
                         selectizeInput(
                           inputId = "WetlandSite",
-                          label = "Wetland Site:",
+                          label = h4("Wetland Site:", class="panel-heading"),
                           choices = plotlist, selected = NULL)
-               )
+               )),
+               downloadButton("downloadSpeciesData", "Download Species List", class="btn btn-primary")
         ),
         #end sidebarpanel
-        mainPanel(width=9, style='padding: 0 0 0 10px',
+        mainPanel(width=7, style='padding: 0 0 0 10px',
           h4("Species Lists by Site"),
-          tableOutput("SpeciesList")
+          span(dataTableOutput('SpeciesList'), style = "font-size:14px;")
         ) # end mainPanel
       ) # end fluidRow
       

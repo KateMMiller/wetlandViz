@@ -7,9 +7,22 @@ library(dplyr)
 library(tidyr)
 
 # Pull in water level data
-welld<-read.csv('./data/well_prec_data_2013-2019.csv')
+welld <- read.csv('./data/well_prec_data_2013-2019.csv')
+well_stats <- read.csv('./data/well_growing_season_stats_2013-2019_long.csv')
+well_stats <- well_stats %>% 
+  mutate(Label = case_when(site == "BIGH_WL" ~ "Big Heath",
+                           site == "DUCK_WL" ~ "Duck Pond",
+                           site == "GILM_WL" ~ "Gilmore Meadow",
+                           site == "HEBR_WL" ~ "Heath Brook",
+                           site == "HODG_WL" ~ "Hodgdon Swamp",
+                           site == "LIHU_WL" ~ "Little Hunter's Brook",
+                           site == "NEMI_WL" ~ "New Mills Meadow",
+                           site == "WMTN_WL" ~ "Western Mtn. Swamp"))
+head(well_stats)
+
 sitedata<-read.csv('./data/Sentinel_and_USA-RAM_Sites.csv')
 
+head(sitedata)
 sentsites<-data.frame(sitename=c("Big Heath", "Duck Pond", "Gilmore Meadow", "Heath Brook", 
                                  "Hodgdon Swamp","Little Hunter's Brook","New Mills Meadow","Western Mtn. Swamp"), 
                       well=c('BIGH_WL', 'DUCK_WL','GILM_WL','HEBR_WL','HODG_WL','LIHU_WL','NEMI_WL',
