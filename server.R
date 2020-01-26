@@ -13,7 +13,19 @@ server <- function(input, output) {
   #-----------------------------
   # Wetland Map Controls
   #-----------------------------
-
+  
+  # About map button
+  observe ({
+    ### Maps  
+    onclick(id = "aboutMapButton", expr = toggle(id = "aboutMapPanel"))
+    onclick(id = "CloseaboutMap", expr = toggle(id = "aboutMapPanel")) 
+    onclick(id = "aboutHydroButton", expr = toggle(id = "aboutHydroPanel"))
+    onclick(id = "CloseaboutHydro", expr = toggle(id = "aboutHydroPanel"))
+    onclick(id = "aboutSppButton", expr = toggle(id = "aboutSppPanel"))
+    onclick(id = "CloseaboutSpp", expr = toggle(id = "aboutSppPanel"))
+    
+  })
+  
   # Render wetland map
   output$WetlandMap <- renderLeaflet({
     leaflet() %>%
@@ -363,14 +375,31 @@ server <- function(input, output) {
       df = welld,
       yvar = input$SentSite,
       years = input$Years,
-      site = as.character(sentsites$sitename[sentsites$well ==
-                                               input$SentSite]))
+      site = NULL#as.character(sentsites$sitename[sentsites$well ==
+    #                                           input$SentSite])
+    )
       })
 
   output$hydroPlot <- renderPlot({
-    print(plotInput())
+    plotInput()
   })  
 
+  output$info <- renderTable({
+    req(input$plot_brush)
+    yvar = input$SentSite
+    brushedPoints(welld[,c('timestamp','year','doy_h', yvar, 'precip_cm')], 
+               input$plot_brush, xvar = "doy_h", yvar = input$SentSite)
+    
+      }, rownames=T)
+  
+  sentSiteName <- reactive({
+    req(input$SentSite)
+    ssname<- as.character(sentsites$sitename[sentsites$well == input$SentSite])
+    return(ssname)
+  })
+
+  output$sentSiteTitle <- renderText({paste0(sentSiteName())})
+  
   # Download hydrograph button
   output$downloadHydroPlot <- downloadHandler(
     filename = function() {

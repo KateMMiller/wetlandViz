@@ -66,19 +66,45 @@ ui<-shinyUI(
                        )
                      )
             ),
-            actionButton('reset_view', "Reset Map", class='btn btn-primary'),br(),
-            tags$head(tags$style(".button{font-size: 12px;}")),
-            downloadButton("downloadData", "Download Data", class="btn btn-primary"),br()
-            )
-        ),
-        column(10, style = "padding: 20px 40px", 
-               div(leafletOutput("WetlandMap", height = "600px")
-               )), br(),
+            tags$div(title = "Reset the Map",
+            actionButton('reset_view', "Reset Map", 
+                         style="color:white;background-color: #5F9EA0; 
+                         border-color:#436e70;font-size:11px")),
+            tags$div(title = "Download the map data",
+            downloadButton("downloadData", "Download Data", 
+                           style="padding:0 1 0 5px;;color:black;background-color:#DCDCDC;
+                                  border-color:#484848;font-size:11px;")),
+            tags$div(title = "About the Map",
+            actionButton(inputId="aboutMapButton",class="btn btn-primary",
+                         style = "border-color:#5c4023; background-color:#a6763f; 
+                            padding:0 1 0 5px;font-size:11px;",
+                          label="About the map"))
+                  )),
         
+        column(10, style = "padding: 20px 40px", 
+               tags$div(title = "Map of wetland sites",
+               div(leafletOutput("WetlandMap", height = "600px")
+               ))), br(),
+        hidden(
+          fixedPanel(class="panel panel-primary controls",draggable=TRUE,cursor="auto",
+                     top = 100, bottom = "auto", 
+                     height = "500",
+                     style="z-index:1000;border-color:#5c4023;",
+                     left = 500, width = "600", id = "aboutMapPanel", style = "padding: 10px",
+                     div(class = "panel-heading", h3("About the Map" ),
+                         style = "background-color:#a6763f;"),
+                     div(class = "panel-body", style= "height: 300px;  
+                         overflow-y: scroll; border-color:black;",  
+                         includeHTML("./www/aboutMap.html")),
+                     div(class="panel-footer", 
+                         actionButton(inputId="CloseaboutMap",class="btn btn-default",label="Close"))  )
+        ),
+        tags$div(title = "photopoints from site",
         h5(column(3, style= "padding: 5px 10px", htmlOutput(outputId="Photo_N"))),
         column(3, style= "padding: 5px 10px", htmlOutput(outputId="Photo_E")),
         column(3, style= "padding: 5px 10px", htmlOutput(outputId="Photo_S")),
         column(3, style= "padding: 5px 10px", htmlOutput(outputId="Photo_W"))
+        )#ends tags$div
         ) # end fluidRow
     ),#end tabPanel
     
@@ -96,7 +122,7 @@ ui<-shinyUI(
           div(id = "HydrographControlPanel", class="panel panel-default controls",
               h4("Hydrograph Controls", class='panel-heading'),
           tags$style(type='text/css', ".selectize-input { font-size: 14px;} .selectize-dropdown { font-size: 14px; }"),
-            tags$div(title = 'Choose the site to plot'),
+            tags$div(title = 'Choose the site to plot',
             selectizeInput(
               inputId = "SentSite",
               label = h4("Sentinel Site:"),
@@ -109,8 +135,8 @@ ui<-shinyUI(
                 "Little Hunter's Brook" = "LIHU_WL",
                 "New Mill Meadow" = "NEMI_WL",
                 "Western Mtn. Swamp" = "WMTN_WL"
-              ),selected = NULL)
-          ),
+              ), selected = NULL
+          )),
           tags$style(type='text/css', ".selectize-input { font-size: 14px;} 
                      .selectize-dropdown { font-size: 14px; }"),
           tags$div(title = 'Choose years to plot',
@@ -119,30 +145,61 @@ ui<-shinyUI(
               label = h4("Years to plot:"),
               multiple = T,
               choices = as.character(unique(welld$year)),
-              selected = 2013:2019)
+              selected = 2019)
           ),
-          downloadButton("downloadHydroPlot", "Download Hydrograph", class="btn btn-primary"),
-          tags$div(title = 'Growing season summary',
-                   tags$hr(style="border-color: black;"),
-                   h4('Growing Season Statistics:'),
-              selectizeInput(inputId = "metric",
+          tags$div(title = "Download Hydrograph",
+          downloadButton("downloadHydroPlot", "Download graph", 
+                         style="padding:0 1 0 5px;color:black;background-color:#DCDCDC;
+                                  border-color:#484848;font-size:11px;"))),
+          tags$div(title = "Select water level statistic", 
+                     class = "panel panel-default controls",
+                h4('Growing Season Statistics:', class='panel-heading'),
+                   tags$hr(style = "border-color: black;"),
+             selectizeInput(inputId = "metric",
                              label = span("Select a statistic", style = "font-size:15px"),
                              choices = unique(well_stats$metricLab),
-                             selected = "Mean Water Level (cm)"),
-              h5(textOutput('tableTitle')),
+                             selected = "Mean Water Level (cm)")),
+          tags$div(title = "Table of water level statistics", 
+            h5(textOutput('tableTitle')),
               span(dataTableOutput('hydroTable'), style = "font-size:15px")),
-          br(),
-          downloadButton("downloadHydroData", "Download Water Level Stats", class="btn btn-primary")
-        ),
-        #end sidebarpanel
-       # mainPanel(
+             br(),
+          tags$div(title = "Download water level statistics",
+          downloadButton("downloadHydroData", "Download Stats", 
+                         style="padding:0 1 0 5px;color:black;background-color:#DCDCDC;
+                                  border-color:#484848;font-size:11px;")),
+          tags$div(title = "About the hydrology data", 
+          actionButton(inputId="aboutHydroButton",class="btn btn-primary",
+                       style = "border-color:#5c4023; background-color:#a6763f; 
+                            padding:4px;font-size:11px;",
+                       label="About the Data"))
+        ), # end sidebarpanel
+      
+      hidden(
+        fixedPanel(class="panel panel-primary controls",draggable=TRUE,cursor="auto",
+                   top = 100, bottom = "auto", 
+                   height = "500",
+                   style="z-index:1000;border-color:#5c4023;",
+                   left = 500, width = "600", id = "aboutHydroPanel", style = "padding: 10px",
+                   div(class = "panel-heading", h3("About the Data" ),
+                       style = "background-color:#a6763f;"),
+                   div(class = "panel-body", style= "height: 300px;  overflow-y: scroll",  
+                       includeHTML("./www/aboutHydro.html")),
+                   div(class="panel-footer", 
+                       actionButton(inputId="CloseaboutHydro",class="btn btn-default",label="Close"))
+        )), # end hidden
+        
        column(10,
-          h4("Wetland Hydrographs"),
-          plotOutput("hydroPlot", width = '100%', height = "700px")
-        )
+          tags$div(title = "Wetland Hydrograph",
+          h4("Wetland Hydrographs for: ", textOutput("sentSiteTitle", inline=T))),
+
+          tags$div(title = "Select points to view below",
+                   plotOutput("hydroPlot", width = '100%', height = "700px", 
+                     brush = "plot_brush")),
+          h5('Data from selected points:'),
+          span(tableOutput("info"), style = "font-size:13px")
+       )
       ) # end fluidpage
-    ),
-    # end tabPanel Hydrograph
+    ),  # end tabPanel Hydrograph
     
     #--------------------------------------------------------------
     #          For Species List Tab
@@ -162,13 +219,35 @@ ui<-shinyUI(
                           inputId = "WetlandSite",
                           label = h4("Wetland Site:", class="panel-heading"),
                           choices = plotlist, selected = NULL)
-               )),
-               downloadButton("downloadSpeciesData", "Download Species List", class="btn btn-primary")
+               ),
+               tags$div(title = "Download species list",
+               downloadButton("downloadSpeciesData", "Download List", 
+                              style="padding:0 10 0 0px;color:black;background-color:#DCDCDC;
+                                  border-color:#484848;font-size:11px;")),
+               tags$div(title = "About the species lists",
+               actionButton(inputId = "aboutSppButton", class = "btn btn-primary",
+                            style = "border-color:#5c4023; background-color:#a6763f; 
+                            padding:0 10 0 0px;font-size:11px;",
+                            label = "About the Data")))
         ),
+        hidden(
+          fixedPanel(class="panel panel-primary controls",draggable=TRUE,cursor="auto",
+                     top = 100, bottom = "auto", 
+                     height = "400",
+                     style="z-index:1000;border-color:#5c4023;",
+                     left = 500, width = "600", id = "aboutSppPanel", 
+                     div(class = "panel-heading", h3("About the Data"),
+                         style = "background-color:#a6763f;"),
+                     div(class = "panel-body", style= "height: 250px;  overflow-y: scroll",  
+                         includeHTML("./www/aboutSppList.html")),
+                     div(class="panel-footer", 
+                         actionButton(inputId="CloseaboutSpp",class="btn btn-default",label="Close"))
+          )),
         #end sidebarpanel
         mainPanel(width=7, style='padding: 0 0 0 10px',
           h4("Species Lists by Site"),
-          span(dataTableOutput('SpeciesList'), style = "font-size:14px;")
+          tags$div(title = "Species list by site",
+          span(dataTableOutput('SpeciesList'), style = "font-size:14px;"))
         ) # end mainPanel
       ) # end fluidRow
       
