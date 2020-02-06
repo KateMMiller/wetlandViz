@@ -37,7 +37,8 @@ ui<-shinyUI(
                 choices = c('Veg MMI' = 'vmmi', 
                             'By Site Type' = 'sitetype',
                             'By Species' = 'spplist' 
-                            )
+                            ),
+                selected="Veg MMI"
               )
             ),
             conditionalPanel(condition = "input.DataGroup=='spplist'",
@@ -135,7 +136,7 @@ ui<-shinyUI(
                 "Little Hunter's Brook" = "LIHU_WL",
                 "New Mill Meadow" = "NEMI_WL",
                 "Western Mtn. Swamp" = "WMTN_WL"
-              ), selected = NULL
+              ), selected = "Big Heath"
           )),
           tags$style(type='text/css', ".selectize-input { font-size: 14px;} 
                      .selectize-dropdown { font-size: 14px; }"),

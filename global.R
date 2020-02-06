@@ -32,7 +32,8 @@ plotList<- noquote(as.character(levels(sitedata$Label)))
 
 # Pull in veg data
 vmmi<-read.csv('./data/vmmi_2019.csv') #includes 2019 data
-sppdata<-read.csv("./data/Sentinel_and_RAM_species_data_2011-2019.csv")
+#sppdata<-read.csv("./data/Sentinel_and_RAM_species_data_2011-2019.csv")
+sppdata<-read.csv("./data/Sentinel_and_RAM_species_data_2011-2019_pub.csv") #sensitive spp. removed
 sampleyears<-c(2011,2015,2017,2018,2019) # most recent survey of available data
 DataTypes<-list(vmmi='Veg. MMI', spplist='Spp. List')
 sitemap<-merge(sitedata,vmmi[,c("Label","Year")], by='Label', all.x=T) %>% 
@@ -50,7 +51,7 @@ sppmap<-sppmap1 %>% filter(Year %in% sampleyears) %>% arrange(Label, Latin_Name,
 
 spplistall<-noquote(as.character(levels(sppmap$Latin_Name)))
 
-sppfull <- sppmap %>% select(-Common, -Invasive) %>% mutate(present=ifelse(PctFreq>0,'Present','Absent')) %>% 
+spplist<- sppmap %>% select(-Common, -Invasive) %>% mutate(present=ifelse(PctFreq>0,'Present','Absent')) %>% 
   select(Label:Site_Type,Latin_Name, Year, present, HGM_Class:Cowardin_Class) %>% 
                              spread(Latin_Name,present,fill='Absent') %>% 
   gather("Latin_Name","Present", -Label,-Longitude,-Latitude,-Site_Type, -Year,

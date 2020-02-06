@@ -34,6 +34,23 @@ server <- function(input, output) {
         urlTemplate = "//{s}.tiles.mapbox.com/v4/nps.2yxv8n84,nps.jhd2e8lb/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibnBzIiwiYSI6IkdfeS1OY1UifQ.K8Qn5ojTw4RV1GwBlsci-Q",
         attribution = NPSAttrib,
         options = tileOptions(minZoom = 8)
+      ) %>%
+      addTiles(
+        group = "Imagery",
+        urlTemplate = "//{s}.tiles.mapbox.com/v4/nps.2c589204,nps.25abf75b,nps.7531d30a/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibnBzIiwiYSI6IkdfeS1OY1UifQ.K8Qn5ojTw4RV1GwBlsci-Q",
+        attribution = NPSAttrib,
+        options = tileOptions(minZoom = 8)
+      ) %>%
+      addTiles(
+        group = "Slate",
+        urlTemplate = "//{s}.tiles.mapbox.com/v4/nps.68926899,nps.502a840b/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibnBzIiwiYSI6IkdfeS1OY1UifQ.K8Qn5ojTw4RV1GwBlsci-Q",
+        attribution = NPSAttrib,
+        options = tileOptions(minZoom = 8)
+      ) %>%
+      addLayersControl(
+        map = ., 
+        baseGroups = c("Map", "Imagery", "Slate"),
+        options = layersControlOptions(collapsed = T)
       ) %>% 
       setView(
         lng = -68.312,
@@ -61,35 +78,6 @@ server <- function(input, output) {
       target='_blank'>Improve Park Tiles</a>"
     )
   
-  # Add a tile layers
-  observe({
-    leafletProxy("WetlandMap") %>%
-      addTiles(
-        group = "Map",
-        urlTemplate = "//{s}.tiles.mapbox.com/v4/nps.2yxv8n84,nps.jhd2e8lb/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibnBzIiwiYSI6IkdfeS1OY1UifQ.K8Qn5ojTw4RV1GwBlsci-Q",
-        attribution = NPSAttrib,
-        options = tileOptions(minZoom = 8)
-      ) %>%
-      addTiles(
-        group = "Imagery",
-        urlTemplate = "//{s}.tiles.mapbox.com/v4/nps.2c589204,nps.25abf75b,nps.7531d30a/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibnBzIiwiYSI6IkdfeS1OY1UifQ.K8Qn5ojTw4RV1GwBlsci-Q",
-        attribution = NPSAttrib,
-        options = tileOptions(minZoom = 8)
-      ) %>%
-      addTiles(
-        group = "Slate",
-        urlTemplate = "//{s}.tiles.mapbox.com/v4/nps.68926899,nps.502a840b/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibnBzIiwiYSI6IkdfeS1OY1UifQ.K8Qn5ojTw4RV1GwBlsci-Q",
-        attribution = NPSAttrib,
-        options = tileOptions(minZoom = 8)
-      ) %>%
-      addLayersControl(
-        map = ., 
-        #        baseGroups = c("Map", "Imagery", "Slate", "OpenStreetMap")
-        baseGroups = c("Map", "Imagery", "Slate"),
-        options = layersControlOptions(collapsed = T)
-      )
-  }) 
-  
   # Select data to map on plot
   MapData <- reactive({
     df<-switch(input$DataGroup,
@@ -103,7 +91,7 @@ server <- function(input, output) {
              switch(input$SppType,
                     "allspp"=
                       if(input$Species !='Select a species'){
-                        sppfull %>% select(Site_Type, Label, Latitude, Longitude, Year,
+                        spplist %>% select(Site_Type, Label, Latitude, Longitude, Year,
                                            Latin_Name, Present, HGM_Class:Cowardin_Class) %>% 
                           filter(Latin_Name %in% input$Species)     
                       } else {
@@ -183,8 +171,8 @@ server <- function(input, output) {
         fillColor = pal()(colorData()),
         fillOpacity = 0.75,
         weight = 1.5,
-        color = "DimGrey"#, popup=pop
-      ) %>%
+        color = "DimGrey"
+        ) %>%
       addLegend('bottomleft', pal = pal(), values = colorData())
 
     output$Photo_N<-renderText({c('<p> Click on a point in the map to view photopoints </p>')})
@@ -356,9 +344,10 @@ server <- function(input, output) {
 
   # Download data button
   output$downloadData <- downloadHandler(
+    req(input$DataGroup),
     filename = function() {
       paste(input$DataGroup, ".csv", sep="")
-    },
+    }, 
     content = function(file){
       write.csv(MapData(), file, row.names=F)
     }
