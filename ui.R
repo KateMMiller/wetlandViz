@@ -19,8 +19,8 @@ ui<-shinyUI(
       h4("Map", align = 'center'), style = "padding: 0", 
       useShinyjs(),
       div(class = 'outer', 
-          tags$head(includeCSS("./www/mapstyles.css")),
-          tags$head(includeScript("https://www.nps.gov/common/commonspot/templates/js/federated-analytics.js"))#,
+          tags$head(includeCSS("./www/mapstyles.css"))#,
+          #tags$head(includeScript("https://www.nps.gov/common/commonspot/templates/js/federated-analytics.js"))#,
           #tags$head(includeCSS("https://www.nps.gov/lib/npmap.js/4.0.0/npmap.min.css")),
           #tags$head(includeScript("https://www.nps.gov/lib/npmap.js/4.0.0/npmap-bootstrap.min.js"))
           ),
@@ -42,13 +42,13 @@ ui<-shinyUI(
               )
             ),
             conditionalPanel(condition = "input.DataGroup=='spplist'",
-                             radioButtons(inputId='SppType', label='Species type:',
-                                          choices=c('All species'='allspp', 
-                                                    'Invasive species'='invspp')
+                             radioButtons(inputId = 'SppType', label = 'Species type:',
+                                          choices = c('All species' = 'allspp', 
+                                                      'Invasive species' = 'invspp')
                              )
                              ),
             conditionalPanel(condition = "input.DataGroup=='spplist' & input.SppType=='allspp'",
-                             tags$style(type='text/css', ".selectize-input {font-size: 14px;} 
+                             tags$style(type = 'text/css', ".selectize-input {font-size: 14px;} 
                                         .selectize-dropdown {font-size: 14px;}"),
                              tags$div(title = "Select a species",
                                selectizeInput(
@@ -69,16 +69,16 @@ ui<-shinyUI(
             ),
             tags$div(title = "Reset the Map",
             actionButton('reset_view', "Reset Map", 
-                         style="color:white;background-color: #5F9EA0; 
-                         border-color:#436e70;font-size:11px")),
+                         style = "color:white;background-color: #5F9EA0; 
+                                  border-color:#436e70;font-size:11px")),
             tags$div(title = "Download the map data",
             downloadButton("downloadData", "Download Data", 
-                           style="padding:0 1 0 5px;;color:black;background-color:#DCDCDC;
-                                  border-color:#484848;font-size:11px;")),
+                           style = "padding:0 1 0 5px;;color:black;background-color:#DCDCDC;
+                                    border-color:#484848;font-size:11px;")),
             tags$div(title = "About the Map",
-            actionButton(inputId="aboutMapButton",class="btn btn-primary",
+            actionButton(inputId = "aboutMapButton", class = "btn btn-primary",
                          style = "border-color:#5c4023; background-color:#a6763f; 
-                            padding:0 1 0 5px;font-size:11px;",
+                                  padding:0 1 0 5px;font-size:11px;",
                           label="About the map"))
                   )),
         
@@ -87,24 +87,24 @@ ui<-shinyUI(
                div(leafletOutput("WetlandMap", height = "600px")
                ))), br(),
         hidden(
-          fixedPanel(class="panel panel-primary controls",draggable=TRUE,cursor="auto",
+          fixedPanel(class = "panel panel-primary controls", draggable = TRUE, cursor = "auto",
                      top = 100, bottom = "auto", 
                      height = "500",
-                     style="z-index:1000;border-color:#5c4023;",
+                     style = "z-index:1000;border-color:#5c4023;",
                      left = 500, width = "600", id = "aboutMapPanel", style = "padding: 10px",
                      div(class = "panel-heading", h3("About the Map" ),
                          style = "background-color:#a6763f;"),
-                     div(class = "panel-body", style= "height: 300px;  
+                     div(class = "panel-body", style = "height: 300px;  
                          overflow-y: scroll; border-color:black;",  
                          includeHTML("./www/aboutMap.html")),
-                     div(class="panel-footer", 
-                         actionButton(inputId="CloseaboutMap",class="btn btn-default",label="Close"))  )
+                     div(class = "panel-footer", 
+                         actionButton(inputId = "CloseaboutMap", class = "btn btn-default", label = "Close"))  )
         ),
         tags$div(title = "photopoints from site",
-        h5(column(3, style= "padding: 5px 10px", htmlOutput(outputId="Photo_N"))),
-        column(3, style= "padding: 5px 10px", htmlOutput(outputId="Photo_E")),
-        column(3, style= "padding: 5px 10px", htmlOutput(outputId="Photo_S")),
-        column(3, style= "padding: 5px 10px", htmlOutput(outputId="Photo_W"))
+        h5(column(3, style = "padding: 5px 10px", htmlOutput(outputId = "Photo_N"))),
+           column(3, style = "padding: 5px 10px", htmlOutput(outputId = "Photo_E")),
+           column(3, style = "padding: 5px 10px", htmlOutput(outputId = "Photo_S")),
+           column(3, style = "padding: 5px 10px", htmlOutput(outputId = "Photo_W"))
         )#ends tags$div
         ) # end fluidRow
     ),#end tabPanel
@@ -120,9 +120,9 @@ ui<-shinyUI(
       
       fluidRow(
         column(2, style = "padding: 0 0 0 10px",
-          div(id = "HydrographControlPanel", class="panel panel-default controls",
-              h4("Hydrograph Controls", class='panel-heading'),
-          tags$style(type='text/css', ".selectize-input { font-size: 14px;} .selectize-dropdown { font-size: 14px; }"),
+          div(id = "HydrographControlPanel", class = "panel panel-default controls",
+              h4("Hydrograph Controls", class = 'panel-heading'),
+          tags$style(type = 'text/css', ".selectize-input { font-size: 14px;} .selectize-dropdown { font-size: 14px; }"),
             tags$div(title = 'Choose the site to plot',
             selectizeInput(
               inputId = "SentSite",
@@ -138,23 +138,23 @@ ui<-shinyUI(
                 "Western Mtn. Swamp" = "WMTN_WL"
               ), selected = "Big Heath"
           )),
-          tags$style(type='text/css', ".selectize-input { font-size: 14px;} 
+          tags$style(type = 'text/css', ".selectize-input { font-size: 14px;} 
                      .selectize-dropdown { font-size: 14px; }"),
           tags$div(title = 'Choose years to plot',
             selectizeInput(
               inputId = "Years",
               label = h4("Years to plot:"),
-              multiple = T,
-              choices = as.character(unique(welld$year)),
+              multiple = TRUE,
+              choices = as.character(unique(welld$Year)),
               selected = 2019)
           ),
           tags$div(title = "Download Hydrograph",
           downloadButton("downloadHydroPlot", "Download graph", 
-                         style="padding:0 1 0 5px;color:black;background-color:#DCDCDC;
+                         style = "padding:0 1 0 5px;color:black;background-color:#DCDCDC;
                                   border-color:#484848;font-size:11px;"))),
           tags$div(title = "Select water level statistic", 
                      class = "panel panel-default controls",
-                h4('Growing Season Statistics:', class='panel-heading'),
+                h4('Growing Season Statistics:', class = 'panel-heading'),
                    tags$hr(style = "border-color: black;"),
              selectizeInput(inputId = "metric",
                              label = span("Select a statistic", style = "font-size:15px"),
@@ -166,32 +166,32 @@ ui<-shinyUI(
              br(),
           tags$div(title = "Download water level statistics",
           downloadButton("downloadHydroData", "Download Stats", 
-                         style="padding:0 1 0 5px;color:black;background-color:#DCDCDC;
+                         style = "padding:0 1 0 5px;color:black;background-color:#DCDCDC;
                                   border-color:#484848;font-size:11px;")),
           tags$div(title = "About the hydrology data", 
-          actionButton(inputId="aboutHydroButton",class="btn btn-primary",
+          actionButton(inputId = "aboutHydroButton", class = "btn btn-primary",
                        style = "border-color:#5c4023; background-color:#a6763f; 
-                            padding:4px;font-size:11px;",
+                                padding:4px;font-size:11px;",
                        label="About the Data"))
         ), # end sidebarpanel
       
       hidden(
-        fixedPanel(class="panel panel-primary controls",draggable=TRUE,cursor="auto",
+        fixedPanel(class = "panel panel-primary controls", draggable = TRUE, cursor = "auto",
                    top = 100, bottom = "auto", 
                    height = "500",
-                   style="z-index:1000;border-color:#5c4023;",
+                   style = "z-index:1000;border-color:#5c4023;",
                    left = 500, width = "600", id = "aboutHydroPanel", style = "padding: 10px",
                    div(class = "panel-heading", h3("About the Data" ),
                        style = "background-color:#a6763f;"),
-                   div(class = "panel-body", style= "height: 300px;  overflow-y: scroll",  
+                   div(class = "panel-body", style = "height: 300px;  overflow-y: scroll",  
                        includeHTML("./www/aboutHydro.html")),
                    div(class="panel-footer", 
-                       actionButton(inputId="CloseaboutHydro",class="btn btn-default",label="Close"))
+                       actionButton(inputId = "CloseaboutHydro", class = "btn btn-default", label = "Close"))
         )), # end hidden
         
        column(10,
           tags$div(title = "Wetland Hydrograph",
-          h4("Wetland Hydrographs for: ", textOutput("sentSiteTitle", inline=T))),
+          h4("Wetland Hydrographs for: ", textOutput("sentSiteTitle", inline = TRUE))),
 
           tags$div(title = "Select points to view below",
                    plotOutput("hydroPlot", width = '100%', height = "700px", 
@@ -212,13 +212,13 @@ ui<-shinyUI(
       
       fluidRow(
         column(2, style = "padding: 0 0 0 20px",
-               div(id = "SppListControlPanel", class="panel panel-default controls",
-                   h4("Species Lists", class='panel-heading'),
+               div(id = "SppListControlPanel", class = "panel panel-default controls",
+                   h4("Species Lists", class = 'panel-heading'),
                
-               tags$div(title = 'Choose the site for species list', class="panel panel-default controls",
+               tags$div(title = 'Choose the site for species list', class = "panel panel-default controls",
                         selectizeInput(
                           inputId = "WetlandSite",
-                          label = h4("Wetland Site:", class="panel-heading"),
+                          label = h4("Wetland Site:", class = "panel-heading"),
                           choices = plotlist, selected = NULL)
                ),
                tags$div(title = "Download species list",
@@ -228,11 +228,11 @@ ui<-shinyUI(
                tags$div(title = "About the species lists",
                actionButton(inputId = "aboutSppButton", class = "btn btn-primary",
                             style = "border-color:#5c4023; background-color:#a6763f; 
-                            padding:0 10 0 0px;font-size:11px;",
+                                     padding:0 10 0 0px;font-size:11px;",
                             label = "About the Data")))
         ),
         hidden(
-          fixedPanel(class="panel panel-primary controls",draggable=TRUE,cursor="auto",
+          fixedPanel(class = "panel panel-primary controls", draggable = TRUE, cursor = "auto",
                      top = 100, bottom = "auto", 
                      height = "400",
                      style="z-index:1000;border-color:#5c4023;",
@@ -241,11 +241,11 @@ ui<-shinyUI(
                          style = "background-color:#a6763f;"),
                      div(class = "panel-body", style= "height: 250px;  overflow-y: scroll",  
                          includeHTML("./www/aboutSppList.html")),
-                     div(class="panel-footer", 
-                         actionButton(inputId="CloseaboutSpp",class="btn btn-default",label="Close"))
+                     div(class = "panel-footer", 
+                         actionButton(inputId = "CloseaboutSpp", class = "btn btn-default", label = "Close"))
           )),
         #end sidebarpanel
-        mainPanel(width=7, style='padding: 0 0 0 10px',
+        mainPanel(width = 7, style = 'padding: 0 0 0 10px',
           h4("Species Lists by Site"),
           tags$div(title = "Species list by site",
           span(dataTableOutput('SpeciesList'), style = "font-size:14px;"))

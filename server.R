@@ -87,20 +87,20 @@ server <- function(input, output) {
            "sitetype" = sitemap %>% select(Site_Type, Label, Latitude, Longitude, Year, HGM_Class,
                                            HGM_Subclass, Cowardin_Class),
            
-           "spplist"= 
+           "spplist" = 
              switch(input$SppType,
-                    "allspp"=
-                      if(input$Species !='Select a species'){
+                    "allspp" =
+                      if(input$Species != 'Select a species'){
                         spplist %>% select(Site_Type, Label, Latitude, Longitude, Year,
                                            Latin_Name, Present, HGM_Class:Cowardin_Class) %>% 
-                          filter(Latin_Name %in% input$Species)     
+                                    filter(Latin_Name %in% input$Species)     
                       } else {
                         sitemap %>% select(Site_Type, Label, Latitude, Longitude, Year, HGM_Class,
                                            HGM_Subclass, Cowardin_Class)
                       },
-                    "invspp"=     
+                    "invspp" =     
                       sppinv %>% select(Site_Type, Label, Latitude, Longitude, inv_present) %>% 
-                      droplevels()
+                                 droplevels()
                      )
            )
   })
@@ -109,20 +109,20 @@ server <- function(input, output) {
   pal <- reactive({
     if (input$DataGroup == 'vmmi') {
       pal <- colorFactor(palette = c('green', 'yellow', 'FireBrick'), 
-                         levels=c('Good','Fair','Poor'))} 
+                         levels = c('Good','Fair','Poor'))} 
     if (input$DataGroup == 'sitetype') {
-      pal <- colorFactor(palette = c("DodgerBlue","ForestGreen"), domain=c('Sentinel','RAM'))} 
+      pal <- colorFactor(palette = c("DodgerBlue","ForestGreen"), domain = c('Sentinel','RAM'))} 
     
     if (input$DataGroup == 'spplist') {
       
-      if(input$SppType == 'allspp' & input$Species!='Select a species'){
-        pal <- colorFactor(palette = c("DimGrey","green"), domain=c('Absent','Present'))}
+      if(input$SppType == 'allspp' & input$Species !='Select a species'){
+        pal <- colorFactor(palette = c("DimGrey","green"), domain = c('Absent','Present'))}
       
-      if(input$SppType == 'allspp' & input$Species=='Select a species'){
-        pal <- colorFactor(palette = c("DodgerBlue","ForestGreen"), domain=c('Sentinel','RAM'))}    
+      if(input$SppType == 'allspp' & input$Species == 'Select a species'){
+        pal <- colorFactor(palette = c("DodgerBlue","ForestGreen"), domain = c('Sentinel','RAM'))}    
       
       if(input$SppType == 'invspp'){
-        pal <- colorFactor(palette=c('DimGrey','green'), levels=c('Absent','Present'))}
+        pal <- colorFactor(palette = c('DimGrey','green'), levels = c('Absent','Present'))}
     }
     return(pal)
   })
@@ -137,10 +137,10 @@ server <- function(input, output) {
     
     if (input$DataGroup == 'spplist') {
       
-      if(input$SppType == 'allspp' & input$Species!='Select a species'){
+      if(input$SppType == 'allspp' & input$Species != 'Select a species'){
         colorData <- MapData()$Present}
       
-      if(input$SppType == 'allspp' & input$Species=='Select a species'){
+      if(input$SppType == 'allspp' & input$Species == 'Select a species'){
         colorData <- MapData()$Site_Type}
       
       if(input$SppType == 'invspp'){
@@ -149,10 +149,7 @@ server <- function(input, output) {
     return(colorData)
   })
   
-  # Observe the zoom level of the map to later toggle plot names on/off based on zoom
-  observeEvent(input$WetlandMap_zoom, {
-      })
-  
+
   # Set up data, initial map, color palette, and filter for colors on map
   observe({
     req(input$WetlandMap_zoom)
@@ -175,10 +172,10 @@ server <- function(input, output) {
         ) %>%
       addLegend('bottomleft', pal = pal(), values = colorData())
 
-    output$Photo_N<-renderText({c('<p> Click on a point in the map to view photopoints </p>')})
-    output$Photo_E<-renderText({c('<p> </p>')})
-    output$Photo_S<-renderText({c('<p> </p>')})
-    output$Photo_W<-renderText({c('<p> </p>')})
+    output$Photo_N <- renderText({c('<p> Click on a point in the map to view photopoints </p>')})
+    output$Photo_E <- renderText({c('<p> </p>')})
+    output$Photo_S <- renderText({c('<p> </p>')})
+    output$Photo_W <- renderText({c('<p> </p>')})
     
   })
   
@@ -197,10 +194,10 @@ server <- function(input, output) {
         zoom = 10
       ) 
 
-    output$Photo_N<-renderText({c('<p> Click on a point in the map to view photopoints </p>')})
-    output$Photo_E<-renderText({c('<p> </p>')})
-    output$Photo_S<-renderText({c('<p> </p>')})
-    output$Photo_W<-renderText({c('<p> </p>')})
+    output$Photo_N <- renderText({c('<p> Click on a point in the map to view photopoints </p>')})
+    output$Photo_E <- renderText({c('<p> </p>')})
+    output$Photo_S <- renderText({c('<p> </p>')})
+    output$Photo_W <- renderText({c('<p> </p>')})
   })
   
   # Set up popups for vmmi ratings or species list
@@ -215,16 +212,16 @@ server <- function(input, output) {
         
         else if(input$DataGroup=='sitetype'){
            sitemap %>% filter(Label == MarkerClick$id) %>% 
-                      select(Site_Type, Year, HGM_Class, HGM_Subclass, Cowardin_Class)}
+                       select(Site_Type, Year, HGM_Class, HGM_Subclass, Cowardin_Class)}
 
         else if(input$DataGroup=='spplist' & input$SppType=='invspp'){
-            sppmap %>% filter(Label == MarkerClick$id) %>% 
-            mutate(species=ifelse(Invasive==TRUE, paste(Latin_Name),paste('No invasives'))) %>% 
-            select(species) %>% unique() %>% droplevels()}
+           sppmap %>% filter(Label == MarkerClick$id) %>% 
+           mutate(species = ifelse(Invasive == TRUE, paste(Latin_Name), paste('No invasives'))) %>% 
+           select(species) %>% unique() %>% droplevels()}
           
 
     content <-
-      paste0("<b>", h4("Site: ",if(site$Site_Type == 'Sentinel'){paste0(site$Label, " (Sentinel)")
+      paste0("<b>", h4("Site: ", if(site$Site_Type == 'Sentinel'){paste0(site$Label, " (Sentinel)")
           } else { if(site$Site_Type == 'RAM'){paste0(site$Label)}}), "</b>",
       if (input$DataGroup == 'vmmi') {
         tagList(tags$table(
@@ -237,13 +234,13 @@ server <- function(input, output) {
               },
               Name = names(tempdata[,1:6]),
               Value = tempdata[,1:6],
-              SIMPLIFY = FALSE ) #end of mapply 
+              SIMPLIFY = FALSE) #end of mapply 
             ) #end of tags$tbody          
           ) # end of tags$table
         ) #end of tagList
       },
       
-      if (input$DataGroup=='sitetype'){
+      if (input$DataGroup == 'sitetype'){
         paste0(h5("HGM Class:", paste0(site$HGM_Class)), 
                h5("HGM Subclass:", paste0(site$HGM_Subclass)),
                h5("Cowardin:", paste0(site$Cowardin_Class)),
@@ -251,20 +248,20 @@ server <- function(input, output) {
       
       if (input$DataGroup == 'spplist'){
         
-        if(input$SppType=='allspp'){
+        if(input$SppType == 'allspp'){
          paste0(h5("HGM Class:", paste0(site$HGM_Class)), 
                h5("HGM Subclass:", paste0(site$HGM_Subclass)),
                h5("Cowardin:", paste0(site$Cowardin_Class)),
                h5("Sample Year:", paste0(site$Year)))} 
         
-        else if(input$SppType=='invspp'){
+        else if(input$SppType == 'invspp'){
           paste0(h5("Invasive Detections:", br(),
                     paste0(
-                    if(nrow(tempdata)==1){paste("None detected")}
-            else if(nrow(tempdata)>0) {paste(tempdata %>% 
-                                                filter(species!= 'No invasives') %>% 
-                                                droplevels() %>% select(species) %>% unlist(), 
-                                             collapse=", ")}
+                    if(nrow(tempdata) == 1){paste("None detected")}
+                    else if(nrow(tempdata) > 0) {paste(tempdata %>% 
+                                                 filter(species != 'No invasives') %>% 
+                                                 droplevels() %>% select(species) %>% unlist(), 
+                                                 collapse=", ")}
           ) 
           )
           )
@@ -275,27 +272,27 @@ server <- function(input, output) {
       ) # end of paste0
     
     photoN<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
-                            mutate(photoN = paste0(North_View, '.gif')) %>%  
-                            select(photoN) %>% droplevels())
+                                      mutate(photoN = paste0(North_View, '.gif')) %>%  
+                                      select(photoN) %>% droplevels())
     
     output$Photo_N <- renderText({c('<img src="',photoN,'" height="250"/>')})
     
     
     photoE<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
-                            mutate(photoE = paste0(East_View, '.gif')) %>%  
-                            select(photoE) %>% droplevels())
+                                      mutate(photoE = paste0(East_View, '.gif')) %>%  
+                                      select(photoE) %>% droplevels())
     
     output$Photo_E <- renderText({c('<img src="',photoE,'" height="250"/>')})
     
     photoS<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
-                            mutate(photoS = paste0(South_View, '.gif')) %>%  
-                            select(photoS) %>% droplevels())
+                                      mutate(photoS = paste0(South_View, '.gif')) %>%  
+                                      select(photoS) %>% droplevels())
     
     output$Photo_S <- renderText({c('<img src="',photoS,'" height="250"/>')})
     
     photoW<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
-                            mutate(photoW = paste0(West_View, '.gif')) %>%  
-                            select(photoW) %>% droplevels())
+                                      mutate(photoW = paste0(West_View, '.gif')) %>%  
+                                      select(photoW) %>% droplevels())
     
     output$Photo_W <- renderText({c('<img src="',photoW,'" height="250"/>')})
     
@@ -314,10 +311,10 @@ server <- function(input, output) {
     
     plot_selected <- MapData() %>% filter(Label == input$plotZoom) %>%  droplevels()
     
-    output$Photo_N<-renderText({c('<p> Click on a point in the map to view photopoints </p>')})
-    output$Photo_E<-renderText({c('<p> </p>')})
-    output$Photo_S<-renderText({c('<p> </p>')})
-    output$Photo_W<-renderText({c('<p> </p>')})
+    output$Photo_N <- renderText({c('<p> Click on a point in the map to view photopoints </p>')})
+    output$Photo_E <- renderText({c('<p> </p>')})
+    output$Photo_S <- renderText({c('<p> </p>')})
+    output$Photo_W <- renderText({c('<p> </p>')})
     
     leafletProxy('WetlandMap') %>% 
       clearControls() %>%
@@ -349,7 +346,7 @@ server <- function(input, output) {
       paste(input$DataGroup, ".csv", sep="")
     }, 
     content = function(file){
-      write.csv(MapData(), file, row.names=F)
+      write.csv(MapData(), file, row.names=FALSE)
     }
   )
 
@@ -376,14 +373,14 @@ server <- function(input, output) {
   output$info <- renderTable({
     req(input$plot_brush)
     yvar = input$SentSite
-    brushedPoints(welld[,c('timestamp','year','doy_h', yvar, 'precip_cm')], 
+    brushedPoints(welld[,c('timestamp','Year','doy_h', yvar, 'precip_cm')], 
                input$plot_brush, xvar = "doy_h", yvar = input$SentSite)
     
       }, rownames=T)
   
   sentSiteName <- reactive({
     req(input$SentSite)
-    ssname<- as.character(sentsites$sitename[sentsites$well == input$SentSite])
+    ssname <- as.character(sentsites$sitename[sentsites$well == input$SentSite])
     return(ssname)
   })
 
@@ -443,8 +440,8 @@ server <- function(input, output) {
       ),
       columnDefs = list(list(className = 'dt-center', targets="_all")),
       autoWidth = FALSE,
-      columnDefs = list(list(targets=c(0), visible=TRUE, width='30%'),
-                   list(targets=c(1), visible=TRUE, width='60%')),
+      columnDefs = list(list(targets = c(0), visible = TRUE, width = '30%'),
+                   list(targets = c(1), visible = TRUE, width = '60%')),
       searching = FALSE,
       dom = 't',
       scrollX = TRUE)) 
@@ -464,10 +461,10 @@ server <- function(input, output) {
   # Species List Tab Controls
   #-------------------------------
   # Make reactive spp list
-  spptable<-reactive({
-     spplisttbl<- sppmap %>% filter(Label==input$WetlandSite) %>% 
-       mutate(Invasive = ifelse(Invasive==FALSE,paste("No"), paste("Yes"))) %>% 
-       select(Latin_Name, Common, Invasive) %>% droplevels()
+  spptable <- reactive({
+     spplisttbl <- sppmap %>% filter(Label == input$WetlandSite) %>% 
+                              mutate(Invasive = ifelse(Invasive == FALSE, paste("No"), paste("Yes"))) %>% 
+                              select(Latin_Name, Common, Invasive) %>% droplevels()
      return(spplisttbl)
   })
   
@@ -482,15 +479,15 @@ server <- function(input, output) {
         list(title = 'Latin Name'),
         list(title = 'Common Name'),
         list(title = "Invasive?")),
-      columnDefs = list(list(className = 'dt-center', targets="_all")),
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
       autoWidth = FALSE,
-      columnDefs = list(list(targets=c(0), visible=TRUE, width='50%'),
-                        list(targets=c(1), visible=TRUE, width='35%'),
-                        list(targets=c(2), visible=TRUE, width='15%')),
+      columnDefs = list(list(targets = c(0), visible = TRUE, width = '50%'),
+                        list(targets = c(1), visible = TRUE, width = '35%'),
+                        list(targets = c(2), visible = TRUE, width = '15%')),
       searching = FALSE,
       dom = 't',
       scroller = TRUE, 
-      scrollX = T, 
+      scrollX = TRUE, 
       pageLength = 150) # Number of elements to allow on one page 
   
   )
@@ -503,7 +500,7 @@ server <- function(input, output) {
        "species_list", ".csv", sep="")
     },
     content = function(file){
-      write.csv(spptable(), file, row.names=F)
+      write.csv(spptable(), file, row.names = FALSE)
     }
   )
   
