@@ -29,6 +29,7 @@ server <- function(input, output) {
   # Render wetland map
   output$WetlandMap <- renderLeaflet({
     leaflet() %>%
+      addTiles(group = "OpenStreetMap") %>% 
       addTiles(
         group = "Map",
         urlTemplate = "//{s}.tiles.mapbox.com/v4/nps.2yxv8n84,nps.jhd2e8lb/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibnBzIiwiYSI6IkdfeS1OY1UifQ.K8Qn5ojTw4RV1GwBlsci-Q",
@@ -49,7 +50,7 @@ server <- function(input, output) {
       ) %>%
       addLayersControl(
         map = ., 
-        baseGroups = c("Map", "Imagery", "Slate"),
+        baseGroups = c("OpenStreet", "Map", "Imagery", "Slate"),
         options = layersControlOptions(collapsed = T)
       ) %>% 
       setView(
