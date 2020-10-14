@@ -21,13 +21,12 @@ well_stats <- well_stats %>%
 
 sitedata<-read.csv('./data/Sentinel_and_USA-RAM_Sites.csv')
 
-head(sitedata)
 sentsites<-data.frame(sitename=c("Big Heath", "Duck Pond", "Gilmore Meadow", "Heath Brook", 
                                  "Hodgdon Swamp","Little Hunter's Brook","New Mills Meadow","Western Mtn. Swamp"), 
                       well=c('BIGH_WL', 'DUCK_WL','GILM_WL','HEBR_WL','HODG_WL','LIHU_WL','NEMI_WL',
                              'WMTN_WL'))
 
-plotList<- noquote(as.character(levels(sitedata$Label)))
+plotList<- noquote(as.character(unique(sitedata$Label)))
 
 # Pull in veg data
 vmmi<-read.csv('./data/vmmi_2019.csv') #includes 2019 data
@@ -48,7 +47,7 @@ sppmap1<-merge(sppdata,sitedata[,c('Label','HGM_Class','HGM_Subclass','Cowardin_
 sppmap<-sppmap1 %>% filter(Year %in% sampleyears) %>% arrange(Label, Latin_Name, PctFreq, Ave_Cov) %>% 
         droplevels()
 
-spplistall<-noquote(as.character(levels(sppmap$Latin_Name)))
+spplistall<-noquote(as.character(unique(sppmap$Latin_Name)))
 
 spplist<- sppmap %>% select(-Common, -Invasive) %>% mutate(present=ifelse(PctFreq>0,'Present','Absent')) %>% 
   select(Label:Site_Type,Latin_Name, Year, present, HGM_Class:Cowardin_Class) %>% 
