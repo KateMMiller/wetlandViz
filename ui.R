@@ -63,7 +63,7 @@ ui<-shinyUI(
                      selectizeInput(
                        inputId = 'plotZoom',
                        label = h5('Zoom to a Site:'),
-                       choices = c('Select a site', plotList  
+                       choices = c('Select a site', plotlist  
                        )
                      )
             ),
@@ -145,7 +145,7 @@ ui<-shinyUI(
               inputId = "Years",
               label = h4("Years to plot:"),
               multiple = T,
-              choices = as.character(unique(welld$year)),
+              choices = as.character(unique(welld$Year)),
               selected = 2019)
           ),
           tags$div(title = "Download Hydrograph",

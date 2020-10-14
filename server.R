@@ -26,33 +26,25 @@ server <- function(input, output) {
     
   })
   
+  # NPS tiles
+  # NPSbasic<-"https://atlas-stg.geoplatform.gov/styles/v1/atlas-user/ck58pyquo009v01p99xebegr9/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYXRsYXMtdXNlciIsImEiOiJjazFmdGx2bjQwMDAwMG5wZmYwbmJwbmE2In0.lWXK2UexpXuyVitesLdwUg"
+  # 
+  # NPSimagery="https://atlas-stg.geoplatform.gov/styles/v1/atlas-user/ck72fwp2642dv07o7tbqinvz4/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYXRsYXMtdXNlciIsImEiOiJjazFmdGx2bjQwMDAwMG5wZmYwbmJwbmE2In0.lWXK2UexpXuyVitesLdwUg"
+  # 
+  # NPSslate="https://atlas-stg.geoplatform.gov/styles/v1/atlas-user/ck5cpvc2e0avf01p9zaw4co8o/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYXRsYXMtdXNlciIsImEiOiJjazFmdGx2bjQwMDAwMG5wZmYwbmJwbmE2In0.lWXK2UexpXuyVitesLdwUg"
+  # 
+  # NPSlight="https://atlas-stg.geoplatform.gov/styles/v1/atlas-user/ck5cpia2u0auf01p9vbugvcpv/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYXRsYXMtdXNlciIsImEiOiJjazFmdGx2bjQwMDAwMG5wZmYwbmJwbmE2In0.lWXK2UexpXuyVitesLdwUg"
+  # 
+  # # Make NPS map Attribution
+  # NPSAttrib <- HTML("<a href='https://www.nps.gov/npmap/disclaimer/'>Disclaimer</a> | 
+  #     &copy; <a href='http://openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a> contributors |
+  #     <a class='improve-park-tiles' 
+  #     href='http://insidemaps.nps.gov/places/editor/#background=mapbox-satellite&map=4/-95.97656/39.02772&overlays=park-tiles-overlay'
+  #     target='_blank'>Improve Park Tiles</a>")
+  
   # Render wetland map
   output$WetlandMap <- renderLeaflet({
     leaflet() %>%
-      addTiles(group = "OpenStreetMap") %>% 
-      addTiles(
-        group = "Map",
-        urlTemplate = "//{s}.tiles.mapbox.com/v4/nps.2yxv8n84,nps.jhd2e8lb/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibnBzIiwiYSI6IkdfeS1OY1UifQ.K8Qn5ojTw4RV1GwBlsci-Q",
-        attribution = NPSAttrib,
-        options = tileOptions(minZoom = 8)
-      ) %>%
-      addTiles(
-        group = "Imagery",
-        urlTemplate = "//{s}.tiles.mapbox.com/v4/nps.2c589204,nps.25abf75b,nps.7531d30a/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibnBzIiwiYSI6IkdfeS1OY1UifQ.K8Qn5ojTw4RV1GwBlsci-Q",
-        attribution = NPSAttrib,
-        options = tileOptions(minZoom = 8)
-      ) %>%
-      addTiles(
-        group = "Slate",
-        urlTemplate = "//{s}.tiles.mapbox.com/v4/nps.68926899,nps.502a840b/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibnBzIiwiYSI6IkdfeS1OY1UifQ.K8Qn5ojTw4RV1GwBlsci-Q",
-        attribution = NPSAttrib,
-        options = tileOptions(minZoom = 8)
-      ) %>%
-      addLayersControl(
-        map = ., 
-        baseGroups = c("OpenStreet", "Map", "Imagery", "Slate"),
-        options = layersControlOptions(collapsed = T)
-      ) %>% 
       setView(
         lng = -68.312,
         lat = 44.25,
@@ -65,21 +57,41 @@ server <- function(input, output) {
         lng2 = -67.5,
         lat1 = 44.9,
         lat2 = 43.5
-      ) 
+      ) %>% 
+      addTiles(group = "OpenStreetMap") #%>% 
+      # addTiles(
+      #   group = "Map",
+      #   urlTemplate = NPSbasic,
+      #   attribution = NPSAttrib,
+      #   options = tileOptions(minZoom = 8)
+      # ) %>%
+      # addTiles(
+      #   group = "Imagery",
+      #   urlTemplate = NPSimagery,
+      #   attribution = NPSAttrib,
+      #   options = tileOptions(minZoom = 8)
+      # ) %>%
+      # addTiles(
+      #   group = "Light",
+      #   urlTemplate = NPSlight,
+      #   attribution = NPSAttrib,
+      #   options = tileOptions(minZoom = 8)
+      # ) %>%
+      # addTiles(
+      #   group = "Slate",
+      #   urlTemplate = NPSslate,
+      #   attribution = NPSAttrib,
+      #   options = tileOptions(minZoom = 8)
+      # ) %>%
+      # addLayersControl(
+      #   map = ., 
+      #   baseGroups = c("OpenStreet","Map", "Imagery", "Light", "Slate"),
+      #   options = layersControlOptions(collapsed = T)
+      # )
   })
+
   
-  # Make NPS map Attribution
-  NPSAttrib <-
-    HTML(
-      "<a href='https://www.nps.gov/npmap/disclaimer/'>Disclaimer</a> |
-      &copy; <a href='http://mapbox.com/about/maps' target='_blank'>Mapbox</a>
-      &copy; <a href='http://openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a> contributors |
-      <a class='improve-park-tiles'
-      href='http://insidemaps.nps.gov/places/editor/#background=mapbox-satellite&map=4/-95.97656/39.02772&overlays=park-tiles-overlay'
-      target='_blank'>Improve Park Tiles</a>"
-    )
-  
-  # Select data to map on plot
+    # Select data to map on plot
   MapData <- reactive({
     df<-switch(input$DataGroup,
            "vmmi" = vmmimap %>% select(Site_Type, Label, Latitude, Longitude, Mean_C, Pct_Cov_TolN, 
@@ -377,7 +389,7 @@ server <- function(input, output) {
   output$info <- renderTable({
     req(input$plot_brush)
     yvar = input$SentSite
-    brushedPoints(welld[,c('timestamp','year','doy_h', yvar, 'precip_cm')], 
+    brushedPoints(welld[,c('timestamp','Year','doy_h', yvar, 'precip_cm')], 
                input$plot_brush, xvar = "doy_h", yvar = input$SentSite)
     
       }, rownames=T)
@@ -408,7 +420,7 @@ server <- function(input, output) {
   hydroData <- reactive({
      df <- well_stats %>% 
        filter(site == input$SentSite, 
-              year %in% input$Years, 
+              Year %in% input$Years, 
               metricLab == input$metric) %>% 
        mutate(value = round(value, 2)) %>% 
        droplevels() 
@@ -431,7 +443,7 @@ server <- function(input, output) {
   
   # Render hydro stats table
   output$hydroTable<-renderDT(
-    hydroData()[,c("year","value")],
+    hydroData()[,c("Year","value")],
     #caption = paste0(unique(hydroData()$metricLab), 
     #                 " for ", unique(hydroData()$Label)),
     class = "display nowrap compact",
