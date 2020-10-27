@@ -3,6 +3,6 @@
 .RData
 .Ruserdata
 data/
-www/
+www/*.JPG
 temp/
 backup/

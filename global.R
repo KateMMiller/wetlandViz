@@ -7,8 +7,9 @@ library(dplyr)
 library(tidyr)
 
 # Pull in water level data
-welld <- read.csv('./data/well_prec_data_2013-2019.csv')
-well_stats <- read.csv('./data/well_growing_season_stats_2013-2019_long.csv')
+welld <- read.csv('./data/well_prec_data_2013-2020.csv')
+well_stats <- read.csv('./data/well_growing_season_stats_2013-2020_long.csv')
+
 well_stats <- well_stats %>% 
   mutate(Label = case_when(site == "BIGH_WL" ~ "Big Heath",
                            site == "DUCK_WL" ~ "Duck Pond",
@@ -19,7 +20,8 @@ well_stats <- well_stats %>%
                            site == "NEMI_WL" ~ "New Mills Meadow",
                            site == "WMTN_WL" ~ "Western Mtn. Swamp"))
 
-sitedata<-read.csv('./data/Sentinel_and_USA-RAM_Sites.csv')
+sitedata<-read.csv('./data/Sentinel_and_USA-RAM_Sites_2020.csv')
+tail(sitedata)
 
 sentsites<-data.frame(sitename=c("Big Heath", "Duck Pond", "Gilmore Meadow", "Heath Brook", 
                                  "Hodgdon Swamp","Little Hunter's Brook","New Mills Meadow","Western Mtn. Swamp"), 
@@ -29,10 +31,10 @@ sentsites<-data.frame(sitename=c("Big Heath", "Duck Pond", "Gilmore Meadow", "He
 plotList<- noquote(as.character(unique(sitedata$Label)))
 
 # Pull in veg data
-vmmi<-read.csv('./data/vmmi_2019.csv') #includes 2019 data
+vmmi<-read.csv('./data/vmmi_2011_2017-2020.csv') #includes 2019 data
 #sppdata<-read.csv("./data/Sentinel_and_RAM_species_data_2011-2019.csv")
-sppdata<-read.csv("./data/Sentinel_and_RAM_species_data_2011-2019_pub.csv") #sensitive spp. removed
-sampleyears<-c(2011,2015,2017,2018,2019) # most recent survey of available data
+sppdata<-read.csv("./data/Sentinel_and_RAM_species_data_2011_2017-2020.csv") #sensitive spp. removed
+sampleyears<-c(2011, 2017, 2018, 2019, 2020) # most recent survey of available data
 DataTypes<-list(vmmi='Veg. MMI', spplist='Spp. List')
 sitemap<-merge(sitedata,vmmi[,c("Label","Year")], by='Label', all.x=T) %>% 
   filter(Year %in% sampleyears) %>% droplevels()

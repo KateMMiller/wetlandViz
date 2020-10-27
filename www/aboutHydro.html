@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  </head>
+  <body>
+    <fontsize="16">
+      <div style="margin-left:20px">
+      <p>This panel displays the results of hourly water level monitoring in sentinel sites during the growing season, 
+         defined as May 15 to October 1. The surface for each hydrograph is represented as a brown horizontal line at
+         0 cm. Hourly precipitation in cm is displayed as a blue line on the hydrograph. Selecting points on the graph
+         will output the selected points in a table below the Hydrograph. </p>
+            
+      <h4>Hydrograph Controls</h4>
+      <p><strong>Sentinel Site: </strong>
+        Choose between the sentintel sites to plot growing season water level. Changing the site will automatically 
+        update the values in the growing season statistics table, and the data to select in the hydrograph.</p>
+
+      <p><strong>Years to plot: </strong>
+        Choose the years to plot and calculate growing season statistics for. Changing the years will automatically 
+        update the values in the growing season statistics table, and the data available to select in the hydrograph.</p>
+      <br>
+      <p><strong>Download Hydrograph: </strong>
+        Downloads a jpg of the hydrograph and names it based on the site and years plotted.
+      </p>
+      <br>
+      <p><strong>Growing Season Stastics: </strong>
+        Allows you to view a specific water level statistic for the years selected above. 
+         <ul>
+           <li><u>Mean Water Level (cm)</u> is the average water level in cm during the growing season.  </li>
+           <li><u>SD Water Level (cm)</u> is the standard deviation in cm of growing season water level.  </li>          
+           <li><u>Minimum Water Level (cm)</u> is the minimum water level recorded in cm during the growing season.  </li>
+           <li><u>Maximum Water Level (cm)</u> is the maximum water level recorded in cm during the growing season. </li>     
+	   <li><u>Maximum hourly increase (cm)</u> is the maximum increase in water level within an hour during the growing season.</li> 
+           <li><u>Maximum hourly decrease (cm)</u> is the maximum decrease in water level within an hour during the growing season.</li>
+           <li><u>Growing Season Change (cm)</u> is the change in cm in growing season water level by comparing the average water levels for June and September. </li>  
+           <li><u>GS % surface water</u> is the % of the growing season that water level was above the surface.</li>           
+           <li><u>GS % within 30cm</u> is the % of the growing season that water level was within 30 cm of the surface.</li>            
+           <li><u>GS % over 30cm deep</u> is the % of the growing season that water level was below 30 cm of the surface. </li>   
+       </ul>
+      </p>
+    <br>
+      <p><strong>Download Water Level Stats: </strong>
+        Downloads all of the growing season statistics for each site and year as a .csv.
+      </p>
+
+      <p><strong>Data from selected points: </strong>
+        The data in this table are based on the points selected by the mouse in the Hydrographs. The column names are defined below:
+      <ul>
+           <li><u>Column 1</u> is the row number for a given record in the water level dataset.</li>      
+           <li><u>timestamp</u> is the hourly timestamp in Eastern timezone.</li>
+           <li><u>year</u> is the year the data were collected.</li>
+           <li><u>doy_h</u> is the calendar day of the year (range 1 to 365) followed by the hour of the day in decimal points (range .01 to .24). Field is only used for plotting.</li>
+           <li><u>SITE_WL</u> is the hourly water level in cm for a given sentinel site, based on the 4-letter site code. </li>
+           <li><u>precip_cm</u> is the hourly precipitation amount in cm.</li>
+      </ul>
+      </p>
+      </div>
+    </fontsize>
+  </body>
+</html>

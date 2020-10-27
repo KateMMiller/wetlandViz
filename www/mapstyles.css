@@ -1,0 +1,106 @@
+input[type="number"] {
+  max-width: 80%;
+}
+
+.outer {
+  position: fixed;
+  top: 80px;
+ /* left: 0;*/
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+/* Customize fonts */
+body, label, input, button, select { 
+    font-family: 'Helvetica Neue', Helvetica;
+    font-weight: 200;
+    font-size: 12px;
+  }
+
+h1, h2, h3, h4 { font-weight: 400; }
+
+hr {
+  margin: 5px;
+}
+
+#MainNavBar {
+  font-size: 16px;
+}
+
+.controls {                           
+
+/* Appearance */
+
+  background-color: white;
+ padding: 0 10px 5px 10px;
+  cursor: move;                        
+
+/* Fade out while not hovering */
+  opacity: 1;                     
+  transition: opacity 500ms 1s;       
+/* zoom 0.9;  Removed as it messes up sliders */
+}                                    
+
+
+/* Fade in while hovering */
+#controls:hover {
+  opacity: 0.95;
+  transition-delay: 0;
+}
+
+/* Position and style citation */
+#cite {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  font-size: 12px;
+}
+
+
+.container-fluid{
+padding: 0 0 0 0;
+}
+
+.navbar .nav{
+  margin-top: 15px;
+}
+
+
+.modal-backdrop .fade .in{
+  opacity: 0.05
+}
+
+.btn{
+  margin-bottom: 4px;
+} 
+
+
+.shiny-progress .progress-text{
+  height: 36px;
+  right: 150px;
+  font-size: 16px;
+  
+}
+
+.shiny-progress .progress-message{
+  color: #FF0000;
+  padding: 10px 3px;
+}
+
+.shiny-progress .progress{
+  height: 10px;
+}
+.navbar .container {
+  margin-left: 0;
+  height: 70px;
+}
+
+.navbar {
+  margin-bottom: 0;
+}
+
+.tab-content {
+  padding: 0 10px;
+}
