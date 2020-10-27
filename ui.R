@@ -20,7 +20,7 @@ ui<-shinyUI(
       useShinyjs(),
       div(class = 'outer', 
           tags$head(includeCSS("./www/mapstyles.css")),
-          tags$head(includeScript("https://www.nps.gov/common/commonspot/templates/js/federated-analytics.js"))#,
+          #tags$head(includeScript("https://www.nps.gov/common/commonspot/templates/js/federated-analytics.js"))#,
           #tags$head(includeCSS("https://www.nps.gov/lib/npmap.js/4.0.0/npmap.min.css")),
           #tags$head(includeScript("https://www.nps.gov/lib/npmap.js/4.0.0/npmap-bootstrap.min.js"))
           ),
