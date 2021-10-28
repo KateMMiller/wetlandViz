@@ -7,8 +7,8 @@ library(dplyr)
 library(tidyr)
 
 # Pull in water level data
-welld <- read.csv('./data/well_prec_data_2013-2020.csv')
-well_stats <- read.csv('./data/well_growing_season_stats_2013-2020_long.csv')
+welld <- read.csv('./data/well_prec_data_2013-2021.csv')
+well_stats <- read.csv('./data/well_growing_season_stats_2013-2021_long.csv')
 
 well_stats <- well_stats %>% 
   mutate(Label = case_when(site == "BIGH_WL" ~ "Big Heath",

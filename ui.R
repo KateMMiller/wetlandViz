@@ -146,7 +146,7 @@ ui<-shinyUI(
               label = h4("Years to plot:"),
               multiple = T,
               choices = as.character(unique(welld$Year)),
-              selected = 2020)
+              selected = 2021)
           ),
           tags$div(title = "Download Hydrograph",
           downloadButton("downloadHydroPlot", "Download graph", 
