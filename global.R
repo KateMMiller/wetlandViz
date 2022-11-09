@@ -6,8 +6,6 @@ library(shinyjs)
 library(dplyr)
 library(tidyr)
 
-#options(shiny.trace=TRUE)
-
 # Pull in water level data
 welld <- read.csv('./data/well_prec_data_2013-2022.csv')
 well_stats <- read.csv('./data/well_growing_season_stats_2013-2022_long.csv')
