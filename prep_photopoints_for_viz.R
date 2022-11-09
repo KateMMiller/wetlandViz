@@ -52,7 +52,7 @@ process_image<-function(import_name, export_name){
 #process_image(import_name=full_names[40], export_name=photo_name2[40]) #test
 length(full_names)
 
-map2(full_names[1:196], photo_name2[1:196], ~process_image(.x,.y))
+map2(full_names[1:length(full_names)], photo_name2[1:length(full_names)], ~process_image(.x,.y))
 
 # Dealing with RAM-17
 full_names17<- list.files('./photopoints/RAM-17', pattern='JPG$', full.names=T)

@@ -6,9 +6,11 @@ library(shinyjs)
 library(dplyr)
 library(tidyr)
 
+#options(shiny.trace=TRUE)
+
 # Pull in water level data
-welld <- read.csv('./data/well_prec_data_2013-2020.csv')
-well_stats <- read.csv('./data/well_growing_season_stats_2013-2020_long.csv')
+welld <- read.csv('./data/well_prec_data_2013-2022.csv')
+well_stats <- read.csv('./data/well_growing_season_stats_2013-2022_long.csv')
 
 well_stats <- well_stats %>% 
   mutate(Label = case_when(site == "BIGH_WL" ~ "Big Heath",
@@ -20,7 +22,7 @@ well_stats <- well_stats %>%
                            site == "NEMI_WL" ~ "New Mills Meadow",
                            site == "WMTN_WL" ~ "Western Mtn. Swamp"))
 
-sitedata<-read.csv('./data/Sentinel_and_USA-RAM_Sites_2020.csv')
+sitedata<-read.csv('./data/Sentinel_and_USA-RAM_Sites_2022.csv')
 tail(sitedata)
 
 sentsites<-data.frame(sitename=c("Big Heath", "Duck Pond", "Gilmore Meadow", "Heath Brook", 
@@ -31,10 +33,10 @@ sentsites<-data.frame(sitename=c("Big Heath", "Duck Pond", "Gilmore Meadow", "He
 plotList<- noquote(as.character(unique(sitedata$Label)))
 
 # Pull in veg data
-vmmi<-read.csv('./data/vmmi_2011_2017-2020.csv') #includes 2019 data
+vmmi<-read.csv('./data/vmmi_2011_2018-2022.csv') #includes 2019 data
 #sppdata<-read.csv("./data/Sentinel_and_RAM_species_data_2011-2019.csv")
-sppdata<-read.csv("./data/Sentinel_and_RAM_species_data_2011_2017-2020.csv") #sensitive spp. removed
-sampleyears<-c(2011, 2017, 2018, 2019, 2020) # most recent survey of available data
+sppdata<-read.csv("./data/Sentinel_and_RAM_species_data_2011_2018-2022.csv") #sensitive spp. removed
+sampleyears<-c(2011, 2018, 2019, 2020, 2022) # most recent survey of available data
 DataTypes<-list(vmmi='Veg. MMI', spplist='Spp. List')
 sitemap<-merge(sitedata,vmmi[,c("Label","Year")], by='Label', all.x=T) %>% 
   filter(Year %in% sampleyears) %>% droplevels()
