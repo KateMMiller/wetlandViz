@@ -6,15 +6,15 @@ library(magick)
 library(stringi)
 library(stringr)
 
-setwd("D:/NETN/R_Dev/")
+setwd("E:/NETN/R_Dev/")
 full_names<- list.files('./photopoints', pattern='JPG$', full.names=T)
 full_names
 photo_name<- list.files('./photopoints', pattern='JPG$', full.names=F)
 photo_name[1]
 
 #photo_name2<-str_replace(photo_name, ".JPG", ".gif")
-photo_name2<-str_replace(photo_name, "_07.", "_07_")
-photo_name2<-str_replace(photo_name2, "_08.", "_08_")
+photo_name2 <- str_replace(photo_name, "_07.", "_07_")
+photo_name2 <- str_replace(photo_name2, "_08.", "_08_")
 
 photo_name2
 
@@ -31,7 +31,7 @@ view_namer<-function(pname){
     ifelse(grepl("P-0", pname), paste("North View"),
            ifelse(grepl("P-90", pname), paste("East View"),
                   ifelse(grepl("P-180", pname), paste("South View"),
-                         ifelse(grepl("P-270", pname), paste("West View"),
+                         ifelse(grepl("P-270|P1-270", pname), paste("West View"),
                                 "none"
                          ))))
   }
@@ -70,30 +70,47 @@ image_write(img4, format='JPG', paste0("./wetlandViz/www/", photo_name17_2[4]))
 
 #---------------------
 # Update file names in sitedata for viz
-sitedata <- read.csv('./wetlandViz/data/Sentinel_and_USA-RAM_Sites.csv')
-sitedata_old <- sitedata %>% filter(Panel != 4)
-all_photos <- data.frame('file' = list.files("./wetlandViz/www/", pattern='JPG$'))
+sitedata <- read.csv('./wetlandViz/data/Sentinel_and_USA-RAM_Sites_2022.csv')
+sitedata_old <- sitedata %>% filter(!Panel %in% c(0, 2))
 
-sitedata_2020 <- sitedata %>% filter(Panel == 4) %>% select(Site:Cowardin_Class)
-panel4 <- paste(sitedata_2020$Label, sep = "", collapse = "|")
+all_photos <- data.frame('file' = list.files("C:/NETN/R_Dev/wetlandViz/www/", pattern='JPG$'))
+colnames(all_photos) <- "filename"
 
-photos_2020 <- all_photos %>% filter(str_detect(file, panel4))
-photos_2020
+sitedata_2023 <- sitedata %>% filter(Panel == 2) %>% select(Site:Cowardin_Class)
+panel2 <- paste(sitedata_2023$Label, sep = "", collapse = "|")
 
-photos_2020 <- photos_2020 %>% mutate(file2 = str_remove(file, ".JPG"),
-                                      scene = case_when(grepl("360L", .$file) ~ paste0("North_View"),
-                                                        grepl("090L", .$file) ~ paste0("East_View"),
-                                                        grepl("180L", .$file) ~ paste0("South_View"),
-                                                        grepl("270L", .$file) ~ paste0("West_View")),
-                                      Label = substr(file, 1, 6)) %>% 
+photos_2023 <- all_photos %>% filter(str_detect(filename, panel2))
+photos_2023
+photos_2023 <- photos_2023 %>% mutate(file2 = str_remove(filename, ".JPG"),
+                                      scene = case_when(grepl("360L", .$filename) ~ paste0("North_View"),
+                                                        grepl("090L", .$filename) ~ paste0("East_View"),
+                                                        grepl("180L", .$filename) ~ paste0("South_View"),
+                                                        grepl("270L", .$filename) ~ paste0("West_View")),
+                                      Label = substr(filename, 1, 6)) %>% 
                                select(file2, scene, Label) %>% 
                                pivot_wider(names_from = scene, values_from = file2)
 
-photos_2020
+sitedata_RAM <- merge(sitedata_2023, photos_2023, by = "Label", all.x = TRUE, all.y = TRUE)
 
-sitedata_update <- merge(sitedata_2020, photos_2020, by = "Label", all.x = TRUE, all.y = TRUE)
-sitedata_final <- rbind(sitedata_old, sitedata_update)
-write.csv(sitedata_final, "./wetlandViz/data/Sentinel_and_USA-RAM_Sites_2020.csv", row.names = FALSE)
+sitedata_2021 <- sitedata %>% filter(Panel == 0) %>% select(Site:Cowardin_Class)
+panel0 <- paste(sitedata_2021$Label, sep = "", collapse = "|")
+head(sitedata)
+
+photos_2021 <- all_photos %>% filter(grepl("NWC21", filename)) %>% 
+  mutate(file2 = str_remove(filename, ".JPG"),
+         scene = case_when(grepl("P-0", .$filename) ~ paste0("North_View"),
+                           grepl("P-90", .$filename) ~ paste0("East_View"),
+                           grepl("P-180", .$filename) ~ paste0("South_View"),
+                           grepl("P-270|P1-270", .$filename) ~ paste0("West_View")),
+         Site = paste0("EPA-R", substr(filename, 12, 14))) %>%
+  select(Site, file2, scene) %>% pivot_wider(names_from = scene, values_from = file2)
+
+photos_2021b <- left_join(photos_2021, sitedata_2021, by = "Site")
+photos_2021b <- photos_2021b[, names(sitedata)]
+
+sitedata_final <- rbind(sitedata_old, sitedata_RAM, photos_2021b)
+
+write.csv(sitedata_final, "C:/NETN/R_Dev/wetlandViz/data/Sentinel_and_USA-RAM_Sites_2023.csv", row.names = FALSE)
 
 #photos_2020 <- all_photos %>% 
 

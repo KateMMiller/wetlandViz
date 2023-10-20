@@ -7,8 +7,8 @@ library(dplyr)
 library(tidyr)
 
 # Pull in water level data
-welld <- read.csv('./data/well_prec_data_2013-2022.csv')
-well_stats <- read.csv('./data/well_growing_season_stats_2013-2022_long.csv')
+welld <- read.csv('./data/well_prec_data_2013-2023.csv')
+well_stats <- read.csv('./data/well_growing_season_stats_2013-2023_long.csv')
 
 well_stats <- well_stats %>% 
   mutate(Label = case_when(site == "BIGH_WL" ~ "Big Heath",
@@ -20,7 +20,7 @@ well_stats <- well_stats %>%
                            site == "NEMI_WL" ~ "New Mills Meadow",
                            site == "WMTN_WL" ~ "Western Mtn. Swamp"))
 
-sitedata<-read.csv('./data/Sentinel_and_USA-RAM_Sites_2022.csv')
+sitedata <- read.csv('./data/Sentinel_and_USA-RAM_Sites_2023.csv')
 tail(sitedata)
 
 sentsites<-data.frame(sitename=c("Big Heath", "Duck Pond", "Gilmore Meadow", "Heath Brook", 
@@ -31,19 +31,22 @@ sentsites<-data.frame(sitename=c("Big Heath", "Duck Pond", "Gilmore Meadow", "He
 plotList<- noquote(as.character(unique(sitedata$Label)))
 
 # Pull in veg data
-vmmi<-read.csv('./data/vmmi_2011_2018-2022.csv') #includes 2019 data
+vmmi<-read.csv('./data/vmmi_2019-2023.csv') #includes 2019 data
 #sppdata<-read.csv("./data/Sentinel_and_RAM_species_data_2011-2019.csv")
-sppdata<-read.csv("./data/Sentinel_and_RAM_species_data_2011_2018-2022.csv") #sensitive spp. removed
-sampleyears<-c(2011, 2018, 2019, 2020, 2022) # most recent survey of available data
-DataTypes<-list(vmmi='Veg. MMI', spplist='Spp. List')
-sitemap<-merge(sitedata,vmmi[,c("Label","Year")], by='Label', all.x=T) %>% 
+sppdata <- read.csv("./data/Sentinel_and_RAM_species_data_2019-2023.csv") #sensitive spp. removed
+sampleyears <- c(2019, 2020, 2021, 2022, 2023) # most recent survey of available data
+DataTypes <- list(vmmi='Veg. MMI', spplist='Spp. List')
+sitemap <- merge(sitedata, vmmi[,c("Label","Year")], by = 'Label', all.x=T) %>% 
   filter(Year %in% sampleyears) %>% droplevels()
 
 # Prep veg data for Map panel
-vmmimap<-merge(sitedata,vmmi,by=c('Label'),all.x=T, all.y=T) %>% mutate_at(vars(Mean_C:VMMI),list(~round(.,1))) %>% 
+vmmimap <-
+  merge(sitedata,vmmi,by=c('Label'),all.x=T, all.y=T) %>% 
+  mutate_at(vars(Mean_C:VMMI),list(~round(.,1))) %>% 
   mutate(VMMI_Rating=factor(VMMI_Rating, levels=c('Good','Fair','Poor'))) %>% arrange(Site_Type,Label) %>% 
   filter(Year %in% sampleyears) %>% 
   select(Label,Site_Type,Longitude,Latitude,Year,Mean_C:VMMI_Rating, North_View:West_View)
+tail(vmmimap)
 
 sppmap1<-merge(sppdata,sitedata[,c('Label','HGM_Class','HGM_Subclass','Cowardin_Class')],by='Label',all.x=T,all.y=T)
 sppmap<-sppmap1 %>% filter(Year %in% sampleyears) %>% arrange(Label, Latin_Name, PctFreq, Ave_Cov) %>% 
