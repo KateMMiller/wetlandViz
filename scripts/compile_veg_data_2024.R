@@ -7,11 +7,11 @@ library(wetlandACAD)
 #setwd("./wetlandViz")
 
 importRAM(export_protected = T)
-
+prev_path <- "C:/NETN/R_Dev/data/wetlandViz_backup/data_prev_versions/"
 #--- VMMI data update ---
 # RAM sites
 vmmi<- sumVegMMI(site = "all", years = 2020:2024) |> mutate(Label = gsub("R-", "RAM-", Code))
-sitedata <- read.csv('./data/Sentinel_and_USA-RAM_Sites_2023.csv')
+sitedata <- read.csv(paste0(prev_path, 'Sentinel_and_USA-RAM_Sites_2023.csv'))
 
 vmmi_site <- left_join(vmmi, sitedata, by = c("Label", "Panel")) |> 
   select(Code, Label, Year, Visit_Type, Mean_C = meanC, Invasive_Cover, 
@@ -35,7 +35,7 @@ table(vmmi_comb$Year)
 write.csv(vmmi_comb, "./data/vmmi_2020-2024.csv", row.names = F)
 
 #--- Species data update ---
-sppdata_prev <- read.csv("./data/Sentinel_and_RAM_species_data_2019-2023.csv") |> filter(Year > 2019)
+sppdata_prev <- read.csv(paste0(prev_path, "Sentinel_and_RAM_species_data_2019-2023.csv")) |> filter(Year > 2019)
 
 sppdata_new <- sumSpeciesList(years = 2024) |> 
   mutate(Label = gsub("R-", "RAM-", Code),
