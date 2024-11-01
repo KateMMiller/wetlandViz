@@ -54,7 +54,7 @@ ui<-shinyUI(
                                selectizeInput(
                                  inputId = "Species",
                                  label = 'Select a species:',
-                                 choices = c('Select a species', spplistall)
+                                 choices = c('Select a species', sort(spplistall))
                                )
                              )),
             tags$style(type='text/css', ".selectize-input { font-size: 14px;} 

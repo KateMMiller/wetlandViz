@@ -58,7 +58,7 @@ sppmap1 <- merge(sppdata, sitedata[,c('Label', 'HGM_Class', 'HGM_Subclass', 'Cow
 sppmap <- sppmap1 %>% filter(Year %in% sampleyears) %>% arrange(Label, Latin_Name, PctFreq, Ave_Cov) %>% 
         droplevels()
 
-spplistall <- noquote(as.character(unique(sppmap$Latin_Name)))
+spplistall <- noquote(as.character(sort(unique(sppmap$Latin_Name))))
 
 spplist <- sppmap %>% select(-Common, -Invasive) %>% 
   mutate(present = ifelse(PctFreq > 0,'Present', 'Absent')) %>% 
