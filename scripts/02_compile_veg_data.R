@@ -6,7 +6,9 @@ library(tidyverse)
 library(wetlandACAD)
 #setwd("./wetlandViz")
 
-importRAM(export_protected = T)
+importRAM(export_protected = T) # have to include protected for VMMI calculation. 
+# Protected species are dropped before written to disk.
+
 path <- "C:/Users/KMMiller/OneDrive - DOI/NETN/R_Dev/wetlandViz/data/"
 #--- VMMI data update ---
 # RAM sites
@@ -25,6 +27,8 @@ vmmi21 <- vmmi_21 |>
   select(Code = site_name, Label = LOCAL_ID, Year, Visit_Type, Mean_C = mean_c_adj, Invasive_Cover = cov_inv_adj,
          Sphagnum_Cover = cov_bryo_adj, Pct_Cov_TolN = cov_tol_adj, VMMI = vmmi, VMMI_Rating = vmmi_rank)
 
+head(vmmi21)
+
 # combine RAM and NWCA sites
 vmmi_comb1 <- rbind(vmmi_site, vmmi21) |> arrange(Code, Year)
 vmmi_comb1$Pct_Cov_TolN <- as.numeric(vmmi_comb1$Pct_Cov_TolN)
@@ -35,8 +39,10 @@ table(vmmi_comb$Year)
 write.csv(vmmi_comb, paste0(path, "vmmi_2021-2025.csv"), row.names = F)
 
 #--- Species data update ---
-sppdata_sen <- read.csv(paste0(path, "Sentinel_species_data_2021.csv")) 
+sppdata_sen <- read.csv(paste0(path, "Sentinel_species_data_2021.csv")) |> 
+  mutate(PctFreq = PctFreq * 100)
 
+head(sppdata_sen)
 sppdata_new <- sumSpeciesList(years = 2022:2025) |> 
   mutate(Label = gsub("R-", "RAM-", Code),
          Site_Type = "RAM",
