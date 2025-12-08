@@ -14,19 +14,7 @@ server <- function(input, output) {
   # Wetland Map Controls
   #-----------------------------
   
-  # About map button
-  # observe ({
-  #   ### Maps  
-  #   onclick(id = "aboutMapButton", expr = toggle(id = "aboutMapPanel"))
-  #   onclick(id = "CloseaboutMap", expr = toggle(id = "aboutMapPanel")) 
-  #   onclick(id = "aboutHydroButton", expr = toggle(id = "aboutHydroPanel"))
-  #   onclick(id = "CloseaboutHydro", expr = toggle(id = "aboutHydroPanel"))
-  #   onclick(id = "aboutSppButton", expr = toggle(id = "aboutSppPanel"))
-  #   onclick(id = "CloseaboutSpp", expr = toggle(id = "aboutSppPanel"))
-  #   
-  # })
-  # 
-  
+  # About the Data buttons
   observeEvent(input$aboutMapButton, showModal(
     modalDialog(title="About the Map", 
                 footer = tagAppendAttributes( modalButton(tags$div("Close")), class="btn btn-primary"),
@@ -47,6 +35,7 @@ server <- function(input, output) {
                 includeHTML("./www/aboutSppList.html")                  
     )
   ))
+  
   NPSbasic <- "https://atlas-stg.geoplatform.gov/styles/v1/atlas-user/ck58pyquo009v01p99xebegr9/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYXRsYXMtdXNlciIsImEiOiJjazFmdGx2bjQwMDAwMG5wZmYwbmJwbmE2In0.lWXK2UexpXuyVitesLdwUg"
   ESRIimagery <- "http://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
   ESRItopo <- "http://services.arcgisonline.com/arcgis/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
