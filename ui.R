@@ -6,7 +6,7 @@ ui<-shinyUI(
   navbarPage(
     title = HTML(
       "<div> <a href='https://www.nps.gov/im/netn/'> <img src='ah_small_black.gif',
-      alt='Forest Visualizer'> </a> NETN Wetland Data Visualizer</div>"
+      alt='Wetland Visualizer'> </a> NETN Wetland Data Visualizer</div>"
     ),
     position = "static-top", inverse = TRUE, collapsible = FALSE, fluid = TRUE,
     theme="https://www.nps.gov/lib/bootstrap/3.3.2/css/nps-bootstrap.min.css",
@@ -86,21 +86,7 @@ ui<-shinyUI(
                tags$div(title = "Map of wetland sites",
                div(leafletOutput("WetlandMap", height = "600px")
                ))), br(),
-        # hidden(
-          fixedPanel(class="panel panel-primary controls",draggable=TRUE,cursor="auto",
-                     top = 100, bottom = "auto",
-                     height = "500",
-                     style="z-index:1000;border-color:#5c4023;",
-                     left = 500, width = "600", id = "aboutMapPanel", style = "padding: 10px",
-                     div(class = "panel-heading", h3("About the Map" ),
-                         style = "background-color:#a6763f;"),
-                     div(class = "panel-body", style= "height: 300px;
-                         overflow-y: scroll; border-color:black;",
-                         includeHTML("./www/aboutMap.html")),
-                     div(class="panel-footer",
-                         actionButton(inputId="CloseaboutMap",
-                                      class="btn btn-default",label="Close"))  ),
-        #),
+        
         tags$div(title = "photopoints from site",
         h5(column(3, style= "padding: 5px 10px", htmlOutput(outputId="Photo_N"))),
         column(3, style= "padding: 5px 10px", htmlOutput(outputId="Photo_E")),
@@ -147,7 +133,7 @@ ui<-shinyUI(
               label = h4("Years to plot:"),
               multiple = T,
               choices = as.character(unique(welld$Year)),
-              selected = 2024)
+              selected = 2025)
           ),
           tags$div(title = "Download Hydrograph",
           downloadButton("downloadHydroPlot", "Download graph", 
@@ -175,22 +161,7 @@ ui<-shinyUI(
                             padding:4px;font-size:11px;",
                        label="About the Data"))
         ), # end sidebarpanel
-      # 
-      # hidden(
-        fixedPanel(class="panel panel-primary controls",draggable=TRUE,cursor="auto",
-                   top = 100, bottom = "auto",
-                   height = "500",
-                   style="z-index:1000;border-color:#5c4023;",
-                   left = 500, width = "600", id = "aboutHydroPanel", style = "padding: 10px",
-                   div(class = "panel-heading", h3("About the Data" ),
-                       style = "background-color:#a6763f;"),
-                   div(class = "panel-body", style= "height: 300px;  overflow-y: scroll",
-                       includeHTML("./www/aboutHydro.html")),
-                   div(class="panel-footer",
-                       actionButton(inputId="CloseaboutHydro",class="btn btn-default",label="Close"))
-        ),
-      #), # end hidden
-        
+
        column(10,
           tags$div(title = "Wetland Hydrograph",
           h4("Wetland Hydrographs for: ", textOutput("sentSiteTitle", inline=T))),
@@ -233,20 +204,6 @@ ui<-shinyUI(
                             padding:0 10 0 0px;font-size:11px;",
                             label = "About the Data")))
         ),
-        # hidden(
-          fixedPanel(class="panel panel-primary controls",draggable=TRUE,cursor="auto",
-                     top = 100, bottom = "auto",
-                     height = "400",
-                     style="z-index:1000;border-color:#5c4023;",
-                     left = 500, width = "600", id = "aboutSppPanel",
-                     div(class = "panel-heading", h3("About the Data"),
-                         style = "background-color:#a6763f;"),
-                     div(class = "panel-body", style= "height: 250px;  overflow-y: scroll",
-                         includeHTML("./www/aboutSppList.html")),
-                     div(class="panel-footer",
-                         actionButton(inputId="CloseaboutSpp",class="btn btn-default",label="Close"))
-          ),
-        #),
         #end sidebarpanel
         mainPanel(width=7, style='padding: 0 0 0 10px',
           h4("Species Lists by Site"),

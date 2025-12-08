@@ -15,31 +15,42 @@ server <- function(input, output) {
   #-----------------------------
   
   # About map button
-  observe ({
-    ### Maps  
-    onclick(id = "aboutMapButton", expr = toggle(id = "aboutMapPanel"))
-    onclick(id = "CloseaboutMap", expr = toggle(id = "aboutMapPanel")) 
-    onclick(id = "aboutHydroButton", expr = toggle(id = "aboutHydroPanel"))
-    onclick(id = "CloseaboutHydro", expr = toggle(id = "aboutHydroPanel"))
-    onclick(id = "aboutSppButton", expr = toggle(id = "aboutSppPanel"))
-    onclick(id = "CloseaboutSpp", expr = toggle(id = "aboutSppPanel"))
-    
-  })
-  
-  # # Hide About Panels- still don't have it working right
-  # https://github.com/daattali/shinyjs/issues/153
-  # observeEvent(input$CloseaboutMap, {
-  #   shinyjs::hidden(id = "aboutMapPanel")
+  # observe ({
+  #   ### Maps  
+  #   onclick(id = "aboutMapButton", expr = toggle(id = "aboutMapPanel"))
+  #   onclick(id = "CloseaboutMap", expr = toggle(id = "aboutMapPanel")) 
+  #   onclick(id = "aboutHydroButton", expr = toggle(id = "aboutHydroPanel"))
+  #   onclick(id = "CloseaboutHydro", expr = toggle(id = "aboutHydroPanel"))
+  #   onclick(id = "aboutSppButton", expr = toggle(id = "aboutSppPanel"))
+  #   onclick(id = "CloseaboutSpp", expr = toggle(id = "aboutSppPanel"))
+  #   
   # })
+  # 
   
-  NPSbasic = "https://atlas-stg.geoplatform.gov/styles/v1/atlas-user/ck58pyquo009v01p99xebegr9/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYXRsYXMtdXNlciIsImEiOiJjazFmdGx2bjQwMDAwMG5wZmYwbmJwbmE2In0.lWXK2UexpXuyVitesLdwUg"
+  observeEvent(input$aboutMapButton, showModal(
+    modalDialog(title="About the Map", 
+                footer = tagAppendAttributes( modalButton(tags$div("Close")), class="btn btn-primary"),
+                includeHTML("./www/aboutMap.html")                  
+    )
+  ))
   
-  NPSimagery = "https://atlas-stg.geoplatform.gov/styles/v1/atlas-user/ck72fwp2642dv07o7tbqinvz4/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYXRsYXMtdXNlciIsImEiOiJjazFmdGx2bjQwMDAwMG5wZmYwbmJwbmE2In0.lWXK2UexpXuyVitesLdwUg"
+  observeEvent(input$aboutHydroButton, showModal(
+    modalDialog(title="About the Hydrographs", 
+                footer = tagAppendAttributes( modalButton(tags$div("Close")), class="btn btn-primary"),
+                includeHTML("./www/aboutHydro.html")                  
+    )
+  ))
   
-  NPSslate = "https://atlas-stg.geoplatform.gov/styles/v1/atlas-user/ck5cpvc2e0avf01p9zaw4co8o/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYXRsYXMtdXNlciIsImEiOiJjazFmdGx2bjQwMDAwMG5wZmYwbmJwbmE2In0.lWXK2UexpXuyVitesLdwUg"
-  
-  NPSlight = "https://atlas-stg.geoplatform.gov/styles/v1/atlas-user/ck5cpia2u0auf01p9vbugvcpv/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYXRsYXMtdXNlciIsImEiOiJjazFmdGx2bjQwMDAwMG5wZmYwbmJwbmE2In0.lWXK2UexpXuyVitesLdwUg"
-  
+  observeEvent(input$aboutSppButton, showModal(
+    modalDialog(title="About the Species Lists", 
+                footer = tagAppendAttributes( modalButton(tags$div("Close")), class="btn btn-primary"),
+                includeHTML("./www/aboutSppList.html")                  
+    )
+  ))
+  NPSbasic <- "https://atlas-stg.geoplatform.gov/styles/v1/atlas-user/ck58pyquo009v01p99xebegr9/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYXRsYXMtdXNlciIsImEiOiJjazFmdGx2bjQwMDAwMG5wZmYwbmJwbmE2In0.lWXK2UexpXuyVitesLdwUg"
+  ESRIimagery <- "http://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+  ESRItopo <- "http://services.arcgisonline.com/arcgis/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
+  ESRINatGeo <- "http://services.arcgisonline.com/arcgis/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}"
    
   # Make NPS map Attribution
   NPSAttrib<-HTML("<a href='https://www.nps.gov/npmap/disclaimer/'>Disclaimer</a> | 
@@ -48,7 +59,7 @@ server <- function(input, output) {
       href='http://insidemaps.nps.gov/places/editor/#background=mapbox-satellite&map=4/-95.97656/39.02772&overlays=park-tiles-overlay'
       target='_blank'>Improve Park Tiles</a>")
 
-  # Render wetland map
+  # Render wetland map - Keep %>% b/c .
   output$WetlandMap <- renderLeaflet({
     leaflet() %>%
       setView(
@@ -65,29 +76,13 @@ server <- function(input, output) {
         lat2 = 43.5
       ) %>% 
       #addTiles(group = "OpenStreetMap") #%>% 
-      addTiles(
-        group = "Map",
-        urlTemplate = NPSbasic,
-        attribution = NPSAttrib) %>%
-      addTiles(
-        group = "Imagery",
-        urlTemplate = NPSimagery,
-        attribution = NPSAttrib) %>%
-      addTiles(
-        group = "Light",
-        urlTemplate = NPSlight,
-        attribution = NPSAttrib,
-        options = tileOptions(minZoom = 8)
-      ) %>%
-      addTiles(
-        group = "Slate",
-        urlTemplate = NPSslate,
-        attribution = NPSAttrib,
-        options = tileOptions(minZoom = 8)
-      ) %>%
+      addTiles(group = "Map", urlTemplate = NPSbasic, options = tileOptions(minZoom = 8)) %>%
+      addTiles(group = "Imagery", urlTemplate = ESRIimagery, options = tileOptions(minZoom = 8)) %>%
+      addTiles(group = "Topo", urlTemplate = ESRItopo, options = tileOptions(minZoom = 8)) %>%
+      addTiles(group = "NatGeo", urlTemplate = ESRINatGeo, options = tileOptions(minZoom = 8)) %>%
       addLayersControl(
         map = .,
-        baseGroups = c("Map", "Imagery", "Light", "Slate"),
+        baseGroups = c("Map", "Imagery", "Topo", "NatGeo"),
         options = layersControlOptions(collapsed = T)
       )
   })
@@ -96,25 +91,25 @@ server <- function(input, output) {
     # Select data to map on plot
   MapData <- reactive({
     df<-switch(input$DataGroup,
-           "vmmi" = vmmimap %>% select(Site_Type, Label, Latitude, Longitude, Mean_C, Pct_Cov_TolN, 
+           "vmmi" = vmmimap |> select(Site_Type, Label, Year, Latitude, Longitude, Mean_C, Pct_Cov_TolN, 
                                        Sphagnum_Cover, Invasive_Cover, VMMI, VMMI_Rating),
            
-           "sitetype" = sitemap %>% select(Site_Type, Label, Latitude, Longitude, Year, HGM_Class,
+           "sitetype" = sitemap |> select(Site_Type, Label, Year, Latitude, Longitude, Year, HGM_Class,
                                            HGM_Subclass, Cowardin_Class),
            
            "spplist"= 
              switch(input$SppType,
                     "allspp"=
                       if(input$Species !='Select a species'){
-                        spplist %>% select(Site_Type, Label, Latitude, Longitude, Year,
-                                           Latin_Name, Present, HGM_Class:Cowardin_Class) %>% 
+                        spplist |> select(Site_Type, Label, Year, Latitude, Longitude, Year,
+                                           Latin_Name, Present, HGM_Class:Cowardin_Class) |> 
                           filter(Latin_Name %in% input$Species)     
                       } else {
-                        sitemap %>% select(Site_Type, Label, Latitude, Longitude, Year, HGM_Class,
+                        sitemap |> select(Site_Type, Label, Year, Latitude, Longitude, Year, HGM_Class,
                                            HGM_Subclass, Cowardin_Class)
                       },
                     "invspp"=     
-                      sppinv %>% select(Site_Type, Label, Latitude, Longitude, inv_present) %>% 
+                      sppinv |> select(Site_Type, Label, Year, Latitude, Longitude, inv_present) |> 
                       droplevels()
                      )
            )
@@ -152,10 +147,10 @@ server <- function(input, output) {
     
     if (input$DataGroup == 'spplist') {
       
-      if(input$SppType == 'allspp' & input$Species!='Select a species'){
+      if(input$SppType == 'allspp' & input$Species != 'Select a species'){
         colorData <- MapData()$Present}
       
-      if(input$SppType == 'allspp' & input$Species=='Select a species'){
+      if(input$SppType == 'allspp' & input$Species == 'Select a species'){
         colorData <- MapData()$Site_Type}
       
       if(input$SppType == 'invspp'){
@@ -172,9 +167,9 @@ server <- function(input, output) {
   observe({
     req(input$WetlandMap_zoom)
     
-    leafletProxy("WetlandMap") %>%
-      clearPopups() %>% 
-      clearControls() %>%
+    leafletProxy("WetlandMap") |>
+      clearPopups() |> 
+      clearControls() |>
       addCircleMarkers(
         data = MapData(),
         radius = 10,
@@ -182,12 +177,12 @@ server <- function(input, output) {
         lat = MapData()$Latitude,
         layerId = MapData()$Label,
         label = if(input$WetlandMap_zoom > 12) MapData()$Label else NULL,
-        labelOptions = labelOptions(noHide=T, textOnly = TRUE, direction = 'bottom', textsize = "12px"),
+        labelOptions = labelOptions(noHide = T, textOnly = TRUE, direction = 'bottom', textsize = "12px"),
         fillColor = pal()(colorData()),
         fillOpacity = 0.75,
         weight = 1.5,
         color = "DimGrey"
-        ) %>%
+        ) |>
       addLegend('bottomleft', pal = pal(), values = colorData())
 
     output$Photo_N<-renderText({c('<p> Click on a point in the map to view photopoints </p>')})
@@ -203,7 +198,7 @@ server <- function(input, output) {
     reset("plotZoom")
     reset("DataGroup")
     
-    leafletProxy("WetlandMap") %>% 
+    leafletProxy("WetlandMap") |>
       clearPopups() %>%
       clearControls() %>% 
       setView(
@@ -212,35 +207,50 @@ server <- function(input, output) {
         zoom = 10
       ) 
 
-    output$Photo_N<-renderText({c('<p> Click on a point in the map to view photopoints </p>')})
-    output$Photo_E<-renderText({c('<p> </p>')})
-    output$Photo_S<-renderText({c('<p> </p>')})
-    output$Photo_W<-renderText({c('<p> </p>')})
+    output$Photo_N <- renderText({c('<p> Click on a point in the map to view photopoints </p>')})
+    output$Photo_E <- renderText({c('<p> </p>')})
+    output$Photo_S <- renderText({c('<p> </p>')})
+    output$Photo_W <- renderText({c('<p> </p>')})
   })
+  
+  # # Set up observe for species selected from Map Panel list
+  # #+++++ ENDED HERE +++++
+  # observeEvent(input$Species, {
+  #   req(input$Species)
+  #   species_selected <- MapData() |> filter(Latin_Name %in% input$Species) |> select(Latin_Name) |>
+  #     droplevels()
+  # })
+  
   
   # Set up popups for vmmi ratings or species list
   observeEvent(input$WetlandMap_marker_click, {
     MarkerClick <- input$WetlandMap_marker_click
     site <- MapData()[MapData()$Label == MarkerClick$id, ]
-
+    
     tempdata <- 
         if (input$DataGroup == 'vmmi') {
-           vmmimap %>% filter(Label == MarkerClick$id) %>% 
-                       select(Mean_C:VMMI_Rating) %>% droplevels()} 
+           vmmimap |> filter(Label == MarkerClick$id) |> 
+                       select(Mean_C:VMMI_Rating) |> droplevels()} 
         
-        else if(input$DataGroup=='sitetype'){
-           sitemap %>% filter(Label == MarkerClick$id) %>% 
-                      select(Site_Type, Year, HGM_Class, HGM_Subclass, Cowardin_Class)}
+        else if(input$DataGroup == 'sitetype'){
+           sitemap |> filter(Label == MarkerClick$id) |> 
+                      select(Site_Type, HGM_Class, HGM_Subclass, Cowardin_Class)}
+    
+        else if(input$DataGroup == 'spplist' & input$SppType == 'allspp'){
+           sppmap |> filter(Label == MarkerClick$id) |> 
+                     filter(Latin_Name == input$Species) |> 
+                     select(species = Latin_Name, PctFreq) |> unique() |> droplevels()}
 
-        else if(input$DataGroup=='spplist' & input$SppType=='invspp'){
-            sppmap %>% filter(Label == MarkerClick$id) %>% 
-            mutate(species=ifelse(Invasive==TRUE, paste(Latin_Name),paste('No invasives'))) %>% 
-            select(species) %>% unique() %>% droplevels()}
+        else if(input$DataGroup == 'spplist' & input$SppType == 'invspp'){
+           sppmap |> filter(Label == MarkerClick$id) |> 
+                     mutate(species = ifelse(Invasive == TRUE, paste(Latin_Name), paste('No invasives'))) |> 
+                     select(species) |> unique() |> droplevels()}
           
 
     content <-
       paste0("<b>", h4("Site: ",if(site$Site_Type == 'Sentinel'){paste0(site$Label, " (Sentinel)")
-          } else { if(site$Site_Type == 'RAM'){paste0(site$Label)}}), "</b>",
+          } else {if(site$Site_Type == 'RAM'){paste0(site$Label)}}), "</b>",
+          h5("Sample Year: ", unique(site$Year)),
       if (input$DataGroup == 'vmmi') {
         tagList(tags$table(
           class = 'table',
@@ -252,33 +262,40 @@ server <- function(input, output) {
               },
               Name = names(tempdata[,1:6]),
               Value = tempdata[,1:6],
-              SIMPLIFY = FALSE ) #end of mapply 
+              SIMPLIFY = FALSE ), #end of mapply 
             ) #end of tags$tbody          
           ) # end of tags$table
         ) #end of tagList
       },
       
-      if (input$DataGroup=='sitetype'){
+      if (input$DataGroup == 'sitetype'){
         paste0(h5("HGM Class:", paste0(site$HGM_Class)), 
                h5("HGM Subclass:", paste0(site$HGM_Subclass)),
-               h5("Cowardin:", paste0(site$Cowardin_Class)),
-               h5("Sample Year:", paste0(site$Year)))},
+               h5("Cowardin:", paste0(site$Cowardin_Class)))},
       
       if (input$DataGroup == 'spplist'){
         
-        if(input$SppType=='allspp'){
-         paste0(h5("HGM Class:", paste0(site$HGM_Class)), 
+        if(input$SppType == 'allspp'){
+          if(input$Species != "Select a species" & nrow(tempdata) > 0){
+          paste0(h5("HGM Class:", paste0(site$HGM_Class)), 
                h5("HGM Subclass:", paste0(site$HGM_Subclass)),
                h5("Cowardin:", paste0(site$Cowardin_Class)),
-               h5("Sample Year:", paste0(site$Year)))} 
+               h5("Latin Name: ", paste0(tempdata$species)),
+               h5("PctFreq", paste0(tempdata$PctFreq)))
+          } else {
+            paste0(h5("HGM Class:", paste0(site$HGM_Class)), 
+                   h5("HGM Subclass:", paste0(site$HGM_Subclass)),
+                   h5("Cowardin:", paste0(site$Cowardin_Class)))
+          }
+          } 
         
-        else if(input$SppType=='invspp'){
+        else if(input$SppType == 'invspp'){
           paste0(h5("Invasive Detections:", br(),
                     paste0(
-                    if(nrow(tempdata)==1){paste("None detected")}
-            else if(nrow(tempdata)>0) {paste(tempdata %>% 
-                                                filter(species!= 'No invasives') %>% 
-                                                droplevels() %>% select(species) %>% unlist(), 
+                    if(nrow(tempdata) == 1){paste("None detected")}
+            else if(nrow(tempdata) > 0) {paste(tempdata |> 
+                                                filter(species!= 'No invasives') |> 
+                                                droplevels() |> select(species) |> unlist(), 
                                              collapse=", ")}
           ) 
           )
@@ -289,7 +306,7 @@ server <- function(input, output) {
 
       ) # end of paste0
     
-    photoN<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
+    photoN <- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
                             mutate(photoN = paste0(North_View, '.JPG')) %>%  
                             select(photoN) %>% droplevels())
     
@@ -329,10 +346,10 @@ server <- function(input, output) {
     
     plot_selected <- MapData() %>% filter(Label == input$plotZoom) %>%  droplevels()
     
-    output$Photo_N<-renderText({c('<p> Click on a point in the map to view photopoints </p>')})
-    output$Photo_E<-renderText({c('<p> </p>')})
-    output$Photo_S<-renderText({c('<p> </p>')})
-    output$Photo_W<-renderText({c('<p> </p>')})
+    output$Photo_N <- renderText({c('<p> Click on a point in the map to view photopoints </p>')})
+    output$Photo_E <- renderText({c('<p> </p>')})
+    output$Photo_S <- renderText({c('<p> </p>')})
+    output$Photo_W <- renderText({c('<p> </p>')})
     
     leafletProxy('WetlandMap') %>% 
       clearControls() %>%
@@ -479,10 +496,10 @@ server <- function(input, output) {
   # Species List Tab Controls
   #-------------------------------
   # Make reactive spp list
-  spptable<-reactive({
-     spplisttbl<- sppmap %>% filter(Label==input$WetlandSite) %>% 
-       mutate(Invasive = ifelse(Invasive==FALSE,paste("No"), paste("Yes"))) %>% 
-       select(Latin_Name, Common, Invasive) %>% droplevels()
+  spptable <- reactive({
+     spplisttbl <- sppmap |> filter(Label == input$WetlandSite) |> 
+       mutate(Invasive = ifelse(Invasive == FALSE,paste("No"), paste("Yes"))) |> 
+       select(Latin_Name, Common, Invasive, Sample_Year = Year) |> droplevels()
      return(spplisttbl)
   })
   
@@ -496,12 +513,14 @@ server <- function(input, output) {
       columns = list(
         list(title = 'Latin Name'),
         list(title = 'Common Name'),
-        list(title = "Invasive?")),
+        list(title = "Invasive?"),
+        list(title = "Sample Year")),
       columnDefs = list(list(className = 'dt-center', targets="_all")),
       autoWidth = FALSE,
-      columnDefs = list(list(targets=c(0), visible=TRUE, width='50%'),
-                        list(targets=c(1), visible=TRUE, width='35%'),
-                        list(targets=c(2), visible=TRUE, width='15%')),
+      columnDefs = list(list(targets = c(0), visible = TRUE, width='45%'),
+                        list(targets = c(1), visible = TRUE, width='35%'),
+                        list(targets = c(2), visible = TRUE, width='15%'),
+                        list(targets = c(3), visible = TRUE, width = '5%')),
       searching = FALSE,
       dom = 't',
       scroller = TRUE, 
