@@ -270,7 +270,7 @@ server <- function(input, output) {
                h5("HGM Subclass:", paste0(site$HGM_Subclass)),
                h5("Cowardin:", paste0(site$Cowardin_Class)),
                h5("Latin Name: ", paste0(tempdata$species)),
-               h5("PctFreq", paste0(tempdata$PctFreq)))
+               h5("Percent Frequency:", paste0(tempdata$PctFreq)))
           } else {
             paste0(h5("HGM Class:", paste0(site$HGM_Class)), 
                    h5("HGM Subclass:", paste0(site$HGM_Subclass)),
