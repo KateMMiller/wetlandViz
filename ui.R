@@ -70,16 +70,16 @@ ui<-shinyUI(
             tags$div(title = "Reset the Map",
             actionButton('reset_view', "Reset Map", 
                          style="color:white;background-color: #5F9EA0; 
-                         border-color:#436e70;font-size:11px")),
+                         border-color:#436e70;font-size:11px;width:50%;")),
             tags$div(title = "Download the map data",
             downloadButton("downloadData", "Download Data", 
                            style="padding:0 1 0 5px;;color:black;background-color:#DCDCDC;
-                                  border-color:#484848;font-size:11px;")),
+                                  border-color:#484848;font-size:11px;width:50%;")),
             tags$div(title = "About the Map",
             actionButton(inputId="aboutMapButton",class="btn btn-primary",
                          style = "border-color:#5c4023; background-color:#a6763f; 
-                            padding:0 1 0 5px;font-size:11px;",
-                          label="About the map"))
+                            padding:0 1 0 5px;font-size:11px;width:50%;",
+                          label="About the Map"))
                   )),
         
         column(10, style = "padding: 20px 40px", 
@@ -136,9 +136,12 @@ ui<-shinyUI(
               selected = 2025)
           ),
           tags$div(title = "Download Hydrograph",
-          downloadButton("downloadHydroPlot", "Download graph", 
+          downloadButton("downloadHydroPlot", "Download Graph", 
                          style="padding:0 1 0 5px;color:black;background-color:#DCDCDC;
-                                  border-color:#484848;font-size:11px;"))),
+                                  border-color:#484848;font-size:11px;width:55%;")),
+          downloadButton("downloadWaterLevel", "Download Data",
+                         style="padding:0 1 0 5px;color:black;background-color:#DCDCDC;
+                                  border-color:#484848;font-size:11px;width:55%;")),
           tags$div(title = "Select water level statistic", 
                      class = "panel panel-default controls",
                 h4('Growing Season Statistics:', class='panel-heading'),
@@ -154,11 +157,11 @@ ui<-shinyUI(
           tags$div(title = "Download water level statistics",
           downloadButton("downloadHydroData", "Download Stats", 
                          style="padding:0 1 0 5px;color:black;background-color:#DCDCDC;
-                                  border-color:#484848;font-size:11px;")),
+                                  border-color:#484848;font-size:11px;width:55%;")),
           tags$div(title = "About the hydrology data", 
           actionButton(inputId="aboutHydroButton",class="btn btn-primary",
                        style = "border-color:#5c4023; background-color:#a6763f; 
-                            padding:4px;font-size:11px;",
+                            padding:4px;font-size:11px;width:55%;",
                        label="About the Data"))
         ), # end sidebarpanel
 
@@ -167,10 +170,11 @@ ui<-shinyUI(
           h4("Wetland Hydrographs for: ", textOutput("sentSiteTitle", inline=T))),
 
           tags$div(title = "Select points to view below",
-                   plotOutput("hydroPlot", width = '100%', height = "700px", 
-                     brush = "plot_brush")),
-          h5('Data from selected points:'),
-          span(tableOutput("info"), style = "font-size:13px")
+                   plotOutput("hydroPlot", width = '100%', height = "700px"#, 
+                              #brush = "plot_brush"
+                              ))#,
+          #h5('Data from selected points:'),
+          #span(tableOutput("tblinfo"), style = "font-size:13px")
        )
       ) # end fluidpage
     ),  # end tabPanel Hydrograph
@@ -197,11 +201,11 @@ ui<-shinyUI(
                tags$div(title = "Download species list",
                downloadButton("downloadSpeciesData", "Download List", 
                               style="padding:0 10 0 0px;color:black;background-color:#DCDCDC;
-                                  border-color:#484848;font-size:11px;")),
+                                  border-color:#484848;font-size:11px;width:55%;")),
                tags$div(title = "About the species lists",
                actionButton(inputId = "aboutSppButton", class = "btn btn-primary",
                             style = "border-color:#5c4023; background-color:#a6763f; 
-                            padding:0 10 0 0px;font-size:11px;",
+                            padding:0 10 0 0px;font-size:11px;width:55%;",
                             label = "About the Data")))
         ),
         #end sidebarpanel
