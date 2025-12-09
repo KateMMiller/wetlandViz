@@ -11,6 +11,9 @@ library(tidyr)
   # C:/Users/KMMiller/OneDrive - DOI/NETN/Monitoring_Projects/Freshwater_Wetland/Hobo_Data/Analysis/Rscripts/Water_Level_work_flow_wetlandACAD_2024.R"
 
 welld <- read.csv('./data/well_prec_data_2013-2025.csv')
+welld$timestamp <- as.POSIXct(ifelse(welld$hr == 0, paste0(welld$timestamp, " 00:00:00"), welld$timestamp),
+                               format = "%Y-%m-%d %H:%M:%S",
+                               tz = "America/New_York")
 well_stats <- read.csv('./data/well_growing_season_stats_2013-2025_long.csv')
 
 well_stats <- well_stats |>  
