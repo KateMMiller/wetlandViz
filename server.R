@@ -48,29 +48,29 @@ server <- function(input, output) {
       href='http://insidemaps.nps.gov/places/editor/#background=mapbox-satellite&map=4/-95.97656/39.02772&overlays=park-tiles-overlay'
       target='_blank'>Improve Park Tiles</a>")
 
-  # Render wetland map - Keep %>% b/c .
+  # Render wetland map - Keep |> b/c .
   output$WetlandMap <- renderLeaflet({
-    leaflet() %>%
+    leaflet() |>
       setView(
         lng = -68.312,
         lat = 44.25,
         #lng = mean(-68.711,-67.953),
         #lat = mean(44.484, 43.953),
         zoom = 10
-      ) %>%
+      ) |>
       setMaxBounds(
         lng1 = -69,
         lng2 = -67.5,
         lat1 = 44.9,
         lat2 = 43.5
-      ) %>% 
-      #addTiles(group = "OpenStreetMap") #%>% 
-      addTiles(group = "Map", urlTemplate = NPSbasic, options = tileOptions(minZoom = 8)) %>%
-      addTiles(group = "Imagery", urlTemplate = ESRIimagery, options = tileOptions(minZoom = 8)) %>%
-      addTiles(group = "Topo", urlTemplate = ESRItopo, options = tileOptions(minZoom = 8)) %>%
-      addTiles(group = "NatGeo", urlTemplate = ESRINatGeo, options = tileOptions(minZoom = 8)) %>%
+      ) |> 
+      #addTiles(group = "OpenStreetMap") #|> 
+      addTiles(group = "Map", urlTemplate = NPSbasic, options = tileOptions(minZoom = 8)) |>
+      addTiles(group = "Imagery", urlTemplate = ESRIimagery, options = tileOptions(minZoom = 8)) |>
+      addTiles(group = "Topo", urlTemplate = ESRItopo, options = tileOptions(minZoom = 8)) |>
+      addTiles(group = "NatGeo", urlTemplate = ESRINatGeo, options = tileOptions(minZoom = 8)) |>
       addLayersControl(
-        map = .,
+        #map = .,
         baseGroups = c("Map", "Imagery", "Topo", "NatGeo"),
         options = layersControlOptions(collapsed = T)
       )
@@ -79,7 +79,7 @@ server <- function(input, output) {
   
     # Select data to map on plot
   MapData <- reactive({
-    df<-switch(input$DataGroup,
+    df <- switch(input$DataGroup,
            "vmmi" = vmmimap |> select(Site_Type, Label, Year, Latitude, Longitude, Mean_C, Pct_Cov_TolN, 
                                        Sphagnum_Cover, Invasive_Cover, VMMI, VMMI_Rating),
            
@@ -188,8 +188,8 @@ server <- function(input, output) {
     reset("DataGroup")
     
     leafletProxy("WetlandMap") |>
-      clearPopups() %>%
-      clearControls() %>% 
+      clearPopups() |>
+      clearControls() |> 
       setView(
         lng = -68.312,
         lat = 44.25,
@@ -295,33 +295,33 @@ server <- function(input, output) {
 
       ) # end of paste0
     
-    photoN <- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
-                            mutate(photoN = paste0(North_View, '.JPG')) %>%  
-                            select(photoN) %>% droplevels())
+    photoN <- as.character(vmmimap |> filter(Label == MarkerClick$id) |> 
+                            mutate(photoN = paste0(North_View, '.JPG')) |>  
+                            select(photoN) |> droplevels())
     
     output$Photo_N <- renderText({c('<img src="',photoN,'" height="250"/>')})
     
     
-    photoE<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
-                            mutate(photoE = paste0(East_View, '.JPG')) %>%  
-                            select(photoE) %>% droplevels())
+    photoE<- as.character(vmmimap |> filter(Label == MarkerClick$id) |> 
+                            mutate(photoE = paste0(East_View, '.JPG')) |>  
+                            select(photoE) |> droplevels())
     
     output$Photo_E <- renderText({c('<img src="',photoE,'" height="250"/>')})
     
-    photoS<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
-                            mutate(photoS = paste0(South_View, '.JPG')) %>%  
-                            select(photoS) %>% droplevels())
+    photoS<- as.character(vmmimap |> filter(Label == MarkerClick$id) |> 
+                            mutate(photoS = paste0(South_View, '.JPG')) |>  
+                            select(photoS) |> droplevels())
     
     output$Photo_S <- renderText({c('<img src="',photoS,'" height="250"/>')})
     
-    photoW<- as.character(vmmimap %>% filter(Label == MarkerClick$id) %>% 
-                            mutate(photoW = paste0(West_View, '.JPG')) %>%  
-                            select(photoW) %>% droplevels())
+    photoW<- as.character(vmmimap |> filter(Label == MarkerClick$id) |> 
+                            mutate(photoW = paste0(West_View, '.JPG')) |>  
+                            select(photoW) |> droplevels())
     
     output$Photo_W <- renderText({c('<img src="',photoW,'" height="250"/>')})
     
-    leafletProxy("WetlandMap") %>%
-      clearPopups() %>%
+    leafletProxy("WetlandMap") |>
+      clearPopups() |>
       addPopups(
         lat = site$Latitude,
         lng = site$Longitude,
@@ -333,21 +333,21 @@ server <- function(input, output) {
   observeEvent(input$plotZoom, {
     req(input$plotZoom)
     
-    plot_selected <- MapData() %>% filter(Label == input$plotZoom) %>%  droplevels()
+    plot_selected <- MapData() |> filter(Label == input$plotZoom) |>  droplevels()
     
     output$Photo_N <- renderText({c('<p> Click on a point in the map to view photopoints </p>')})
     output$Photo_E <- renderText({c('<p> </p>')})
     output$Photo_S <- renderText({c('<p> </p>')})
     output$Photo_W <- renderText({c('<p> </p>')})
     
-    leafletProxy('WetlandMap') %>% 
-      clearControls() %>%
-      clearPopups() %>% 
+    leafletProxy('WetlandMap') |> 
+      clearControls() |>
+      clearPopups() |> 
       setView(
         lng =  plot_selected$Longitude, 
         lat = plot_selected$Latitude, 
         zoom = 16) 
-    delay(400, leafletProxy("WetlandMap") %>% 
+    delay(400, leafletProxy("WetlandMap") |> 
       addCircles(
         lng = plot_selected$Longitude,
         lat = plot_selected$Latitude,
@@ -358,7 +358,7 @@ server <- function(input, output) {
         fillOpacity = 0,
         weight = 5)) 
     delay(1000, 
-    leafletProxy('WetlandMap') %>% 
+    leafletProxy('WetlandMap') |> 
       clearShapes())
   })
   
@@ -379,35 +379,112 @@ server <- function(input, output) {
   #-------------------------------
   # Hydrograph Plot Controls
   #-------------------------------
-  # Render hydroplot
-  plotInput <- reactive({
-    plot_hydro_site_year(
-      df = welld,
-      yvar = input$SentSite,
-      years = input$Years,
-      site = NULL#as.character(sentsites$sitename[sentsites$well ==
-    #                                           input$SentSite])
-    )
-      })
-
-  output$hydroPlot <- renderPlot({
-    plotInput()
-  })  
-
-  output$info <- renderTable({
-    req(input$plot_brush)
-    yvar = input$SentSite
-    brushedPoints(welld[,c('timestamp','Year','doy_h', yvar, 'precip_cm')], 
-               input$plot_brush, xvar = "doy_h", yvar = input$SentSite)
-    
-      }, rownames=T)
+  # Reactive WL data for hydrographs
+  WLData <- reactive({
+    df1 <- welld |> filter(Year %in% input$Years) 
+    df <- df1[,c('timestamp','Year','doy_h', input$SentSite, 'precip_cm', 'doy', 'lag.precip')]
+    colnames(df) <- c("timestamp", "Year", "doy_h", "WL", "precip_cm", "doy", 'lag.precip')
+    df$precip5 <- df$lag.precip*5
+    df$site = substr(input$SentSite, 1, 4)
+    return(df)
+  })
   
   sentSiteName <- reactive({
     req(input$SentSite)
     ssname<- as.character(sentsites$sitename[sentsites$well == input$SentSite])
     return(ssname)
   })
+  
+  # Render hydroplot
+  # plotInput <- reactive({
+  #   minWL = min(WLData()$WL, na.rm = T)
+  # 
+  #   p <- 
+  #     ggplot(WLData(), aes(x = doy_h, y = WL, group = Year)) +
+  #     geom_line(col = 'black')+
+  #     geom_line(aes(x = doy_h, y = lag.precip*5 + minWL, group = Year), col ='blue')+
+  #     facet_wrap(~Year, nrow = length(unique(WLData()$Year)))+
+  #     geom_hline(yintercept = 0, col = 'brown')+
+  #     theme_bw()+
+  #     theme(plot.title = element_text(hjust = 0.5),
+  #           panel.grid.minor = element_blank(),
+  #           panel.grid.major = element_blank(),
+  #           axis.text.y.right = element_text(color = 'blue'),
+  #           axis.title.y.right = element_text(color = 'blue'),
+  #           strip.text = element_text(size = 11))+
+  #     labs(y = 'Water Level (cm)\n', x = 'Date')+
+  #     scale_x_continuous(breaks = c(121, 152, 182, 213, 244, 274),
+  #                        labels = c('May-01', 'Jun-01',
+  #                                   'Jul-01', 'Aug-01',
+  #                                   'Sep-01', 'Oct-01'))+
+  #     scale_y_continuous(sec.axis = sec_axis(~.,
+  #                                            breaks = c(minWL, minWL+10),
+  #                                            name = 'Hourly Precip. (cm)\n',
+  #                                            labels = c('0', '2')))
+  #   # Manually coded hydroPlot for easier brush
+  #   # plot_hydro_site_year(
+  #   #   df = WLData(),
+  #   #   yvar = "WL",
+  #   #   years = input$Years,
+  #   #   site = NULL)
+  #   p
+  #     })
 
+  plot.range <- reactiveValues(x = NULL, y = NULL)
+  
+  output$hydroPlot <- renderPlot({
+    minWL = min(WLData()$WL, na.rm = T)
+
+    p <- 
+      ggplot(WLData(), aes(x = doy_h, y = WL, group = Year)) +
+      geom_line(aes(x = doy_h, y = precip5+minWL, group = Year), col ='blue')+
+      geom_line(col = 'black')+
+      facet_wrap(~Year, nrow = length(unique(WLData()$Year)))+
+      geom_hline(yintercept = 0, col = 'brown')+
+      theme_bw()+
+      theme(plot.title = element_text(hjust = 0.5),
+            panel.grid.minor = element_blank(),
+            panel.grid.major = element_blank(),
+            axis.text.y.right = element_text(color = 'blue'),
+            axis.title.y.right = element_text(color = 'blue'),
+            strip.text = element_text(size = 11))+
+      labs(y = 'Water Level (cm)\n', x = 'Date')+
+      scale_x_continuous(breaks = c(121, 152, 182, 213, 244, 274),
+                         labels = c('May-01', 'Jun-01',
+                                    'Jul-01', 'Aug-01',
+                                    'Sep-01', 'Oct-01'))+
+      scale_y_continuous(sec.axis = sec_axis(~.,
+                                             breaks = c(minWL, minWL+10),
+                                             name = 'Hourly Precip. (cm)\n',
+                                             labels = c('0', '2'))) 
+    p
+  })  
+  
+  # observeEvent(input$plot_brush, {
+  #   brush = input$plot_brush
+  #   print(brush)
+  #   if (!is.null(brush)) {
+  #     plot.range$x <- c(brush$xmin, brush$xmax)
+  #     plot.range$y <- c(brush$ymin, brush$ymax)
+  #   } else {
+  #     plot.range$x <- NULL
+  #     plot.range$y <- NULL
+  #   }
+  # })
+
+  # brushedData <- reactive({
+  #   bdf <- brushedPoints(WLData()[,c("timestamp", "Year", "WL", "precip_cm", "doy_h")], 
+  #                        brush = input$plot_brush,
+  #                        xvar = "doy_h", 
+  #                        yvar = "WL",
+  #                        allRows = F)
+  #  # print(head(bdf))
+  #   return(bdf)})
+  # 
+  # output$tblinfo <- renderTable({
+  #   brushedData()
+  #   }, rownames = T)
+  
   output$sentSiteTitle <- renderText({paste0(sentSiteName())})
   
   # Download hydrograph button
@@ -423,14 +500,27 @@ server <- function(input, output) {
     }
   )
   
+  # Download WaterLevel button
+  output$downloadWaterLevel <- downloadHandler(
+    filename = function() {
+      paste0(substr(input$SentSite, 1, 4), "_hourly_water_level_",
+             ifelse(length(input$Years)>1, paste0(range(input$Years)[1], "-", range(input$Years)[2]),
+                    paste0(input$Years[1])), ".csv")
+    },
+    content = function(file){
+      write.csv(WLData(), file, row.names = F)
+      
+    }
+  )
+
   # Reactive hydro stats dataset for hydroTable
   
   hydroData <- reactive({
-     df <- well_stats %>% 
+     df <- well_stats |> 
        filter(site == input$SentSite, 
               Year %in% input$Years, 
-              metricLab == input$metric) %>% 
-       mutate(value = round(value, 2)) %>% 
+              metricLab == input$metric) |> 
+       mutate(value = round(value, 2)) |> 
        droplevels() 
      return(df)
   })
@@ -450,7 +540,7 @@ server <- function(input, output) {
   )
   
   # Render hydro stats table
-  output$hydroTable<-renderDT(
+  output$hydroTable <- renderDT(
     hydroData()[,c("Year","value")],
     #caption = paste0(unique(hydroData()$metricLab), 
     #                 " for ", unique(hydroData()$Label)),
