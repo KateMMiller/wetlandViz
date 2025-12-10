@@ -432,9 +432,9 @@ server <- function(input, output) {
 
   plot.range <- reactiveValues(x = NULL, y = NULL)
   
-  output$hydroPlot <- renderPlot({
+  plotInput <- reactive({
     minWL = min(WLData()$WL, na.rm = T)
-
+    
     p <- 
       ggplot(WLData(), aes(x = doy_h, y = WL, group = Year)) +
       geom_line(aes(x = doy_h, y = precip5+minWL, group = Year), col ='blue')+
@@ -458,6 +458,11 @@ server <- function(input, output) {
                                              name = 'Hourly Precip. (cm)\n',
                                              labels = c('0', '2'))) 
     p
+    
+  })
+  
+  output$hydroPlot <- renderPlot({
+    plotInput()
   })  
   
   # observeEvent(input$plot_brush, {
