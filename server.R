@@ -1,4 +1,4 @@
-library(wetlandACAD)
+library(wetlandACAD) # from doi-nps/wetlandACAD
 library(shiny)
 library(dplyr)
 library(leaflet)
@@ -36,17 +36,10 @@ server <- function(input, output) {
     )
   ))
   
-  NPSbasic <- "https://atlas-stg.geoplatform.gov/styles/v1/atlas-user/ck58pyquo009v01p99xebegr9/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYXRsYXMtdXNlciIsImEiOiJjazFmdGx2bjQwMDAwMG5wZmYwbmJwbmE2In0.lWXK2UexpXuyVitesLdwUg"
   ESRIimagery <- "http://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
   ESRItopo <- "http://services.arcgisonline.com/arcgis/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
   ESRINatGeo <- "http://services.arcgisonline.com/arcgis/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}"
    
-  # Make NPS map Attribution
-  NPSAttrib<-HTML("<a href='https://www.nps.gov/npmap/disclaimer/'>Disclaimer</a> | 
-      &copy; <a href='http://openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a> contributors |
-      <a class='improve-park-tiles' 
-      href='http://insidemaps.nps.gov/places/editor/#background=mapbox-satellite&map=4/-95.97656/39.02772&overlays=park-tiles-overlay'
-      target='_blank'>Improve Park Tiles</a>")
 
   # Render wetland map - Keep |> b/c .
   output$WetlandMap <- renderLeaflet({
@@ -65,13 +58,12 @@ server <- function(input, output) {
         lat2 = 43.5
       ) |> 
       #addTiles(group = "OpenStreetMap") #|> 
-      addTiles(group = "Map", urlTemplate = NPSbasic, options = tileOptions(minZoom = 8)) |>
-      addTiles(group = "Imagery", urlTemplate = ESRIimagery, options = tileOptions(minZoom = 8)) |>
       addTiles(group = "Topo", urlTemplate = ESRItopo, options = tileOptions(minZoom = 8)) |>
+      addTiles(group = "Imagery", urlTemplate = ESRIimagery, options = tileOptions(minZoom = 8)) |>
       addTiles(group = "NatGeo", urlTemplate = ESRINatGeo, options = tileOptions(minZoom = 8)) |>
       addLayersControl(
         #map = .,
-        baseGroups = c("Map", "Imagery", "Topo", "NatGeo"),
+        baseGroups = c("Topo", "Imagery", "NatGeo"),
         options = layersControlOptions(collapsed = T)
       )
   })

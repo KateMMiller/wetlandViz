@@ -6,3 +6,6 @@ data/
 www/*.JPG
 temp/
 backup/
+*.zip
+data_prev_versions/
+data/prev_versions/
